@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ตูนล้อโต 2.0.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        /* ... (CSS styles remain the same) ... */
+        body { font-family: 'Tahoma', 'sans-serif'; }
+        table th, table td { padding: 8px 10px; text-align: center; border: 1px solid #e2e8f0; white-space: nowrap; }
+        table th { background-color: #f1f5f9; }
+        button { transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease; }
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+        .modal { display: none; position: fixed; z-index: 50; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); }
+        .modal-content { background-color: #fefefe; margin: 15% auto; padding: 25px; border: 1px solid #888; width: 90%; max-width: 450px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        .close-button { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; line-height: 1; }
+        .close-button:hover, .close-button:focus { color: black; text-decoration: none; }
+        #rightPanelContainer { max-height: 65vh; overflow-y: auto; scroll-behavior: smooth; }
+        #rightPanelTable td, #rightPanelTable th { font-size: 0.875rem; padding: 4px 6px;}
+        .highlight-row { background-color: #fef08a !important; }
+        .digit-button.active { background-color: #4f46e5; color: white; border-color: #4f46e5; }
+        .digit-button:not(.active):hover { background-color: #f1f5f9; }
+        .perm-link { cursor: pointer; color: #3b82f6; text-decoration: none; margin: 0 2px; }
+        .perm-link:hover { text-decoration: underline; }
+        .summary-button { background-color: white; color: black; border: 1px solid #d1d5db; padding: 4px 8px; font-size: 0.875rem; border-radius: 0.375rem; margin-left: 8px; }
+        .summary-button:hover { background-color: #f9fafb; }
+        .summary-list-item { padding: 6px 0; border-bottom: 1px solid #e5e7eb; font-size: 0.9rem; }
+        .summary-list-item:last-child { border-bottom: none; }
+        #confirmModal .modal-content { max-width: 400px; }
+        #limitModal .modal-content { max-width: 350px; }
+        #confirmMessage, #limitMessage { margin-bottom: 20px; font-size: 1rem; line-height: 1.5; }
+        #confirmButtons, #limitButtons { text-align: right; margin-top: 15px; }
+        #confirmButtons button, #limitButtons button { margin-left: 10px; padding: 8px 16px; border-radius: 6px; font-weight: 500; }
+        .quick-price-btn { background-color: #e5e7eb; color: #374151; border: 1px solid #d1d5db; padding: 2px 8px; font-size: 0.75rem; border-radius: 0.375rem; margin-right: 4px; margin-bottom: 4px; cursor: pointer; }
+        .quick-price-btn:hover { background-color: #d1d5db; }
+        .quick-price-container { margin-top: 4px; display: flex; flex-wrap: wrap; }
+        .modal-export-button { background-color: #10b981; color: white; padding: 6px 12px; font-size: 0.875rem; border-radius: 0.375rem; margin-top: 15px; display: inline-block; }
+        .modal-export-button:hover { background-color: #059669; }
+        .pagination-controls { margin-top: 1rem; text-align: center; }
+        .pagination-button { background-color: white; border: 1px solid #d1d5db; color: #374151; padding: 5px 10px; margin: 0 2px; cursor: pointer; border-radius: 4px; font-size: 0.875rem; }
+        .pagination-button:hover { background-color: #f3f4f6; }
+        .pagination-button.active { background-color: #3b82f6; color: white; border-color: #3b82f6; font-weight: bold; }
+        .pagination-button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .blank-row td { color: transparent; }
+        .blank-row:hover { background-color: transparent !important; }
+        #changelogBtn { position: absolute; bottom: 10px; right: 15px; font-size: 0.75rem; color: #6b7280; cursor: pointer; text-decoration: none; border: none; background: none; padding: 5px; }
+        #changelogBtn:hover { color: #1f2937; text-decoration: underline; }
+        #changelogModal .modal-content { max-width: 500px; }
+        #changelogContent { max-height: 60vh; overflow-y: auto; }
+        #changelogContent h4 { font-size: 1rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; border-bottom: 1px solid #eee; padding-bottom: 0.25rem; }
+        #changelogContent ul { list-style: disc; margin-left: 1.5rem; margin-bottom: 1rem; }
+        #changelogContent li { margin-bottom: 0.25rem; font-size: 0.9rem; }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 md:p-8">
+
+    <div class="container mx-auto max-w-7xl bg-white p-5 md:p-6 rounded-lg shadow-md relative">
+        <div class="absolute top-2 right-3 text-xs text-gray-400">
+            ตูนล้อโต Designed by Shiro
+        </div>
+        <button id="changelogBtn">ประวัติอัปเดต</button>
+
+        <h1 class="text-2xl md:text-3xl font-bold mb-6 text-center text-blue-600 pt-2">ตูนล้อโต 2.0.0</h1>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2">
+                <div id="mainInputArea" class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 items-start"> <div class="md:col-span-2"> <label for="numberInput" class="block text-sm font-medium text-gray-700 mb-1">เลขที่ซื้อ:</label> <input type="text" id="numberInput" inputmode="numeric" pattern="\d*" maxlength="3" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="เช่น 123"> </div> <div class="md:col-span-2"> <label for="directAmountInput" class="block text-sm font-medium text-gray-700 mb-1">จำนวนเงิน:</label> <input type="number" id="directAmountInput" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100" placeholder="ใส่ราคา" disabled> <div class="quick-price-container"> <button class="quick-price-btn" data-amount="1" data-target-input="directAmountInput">1</button> <button class="quick-price-btn" data-amount="10" data-target-input="directAmountInput">10</button> <button class="quick-price-btn" data-amount="20" data-target-input="directAmountInput">20</button> <button class="quick-price-btn" data-amount="30" data-target-input="directAmountInput">30</button> <button class="quick-price-btn" data-amount="40" data-target-input="directAmountInput">40</button> <button class="quick-price-btn" data-amount="50" data-target-input="directAmountInput">50</button> <button class="quick-price-btn" data-amount="60" data-target-input="directAmountInput">60</button> <button class="quick-price-btn" data-amount="70" data-target-input="directAmountInput">70</button> <button class="quick-price-btn" data-amount="80" data-target-input="directAmountInput">80</button> <button class="quick-price-btn" data-amount="90" data-target-input="directAmountInput">90</button> <button class="quick-price-btn" data-amount="100" data-target-input="directAmountInput">100</button> <button class="quick-price-btn" data-amount="150" data-target-input="directAmountInput">150</button> <button class="quick-price-btn" data-amount="200" data-target-input="directAmountInput">200</button> <button class="quick-price-btn" data-amount="250" data-target-input="directAmountInput">250</button> <button class="quick-price-btn" data-amount="300" data-target-input="directAmountInput">300</button> <button class="quick-price-btn" data-amount="400" data-target-input="directAmountInput">400</button> <button class="quick-price-btn" data-amount="500" data-target-input="directAmountInput">500</button> <button class="quick-price-btn" data-amount="1000" data-target-input="directAmountInput">1000</button> </div> </div> <div class="md:col-span-2 grid grid-cols-3 gap-2 pt-5"> <button id="directAddButton" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md shadow h-10 disabled:opacity-50" disabled>ตัวตรง</button> <button id="permuteButton" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-md shadow h-10 disabled:opacity-50" disabled>ตัวกลับ</button> <button id="todAddButton" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-md shadow h-10 disabled:opacity-50" disabled>ตัวโต๊ด</button> </div> </div>
+                <div id="messageArea" class="mb-4 text-center min-h-[1.5rem]"></div>
+                <div class="flex justify-between items-center mb-2"> <div class="flex items-center"> <h2 class="text-xl font-semibold text-gray-800">รายการทั้งหมด</h2> <button id="showRegularPopupBtn" class="summary-button" title="แสดงรายการ ตัวตรง">ตัวตรง</button> <button id="showTodPopupBtn" class="summary-button" title="แสดงรายการ ตัวโต๊ด">ตัวโต๊ด</button> <button id="showCappedPopupBtn" class="summary-button" title="แสดงรายการ ยอดอั้น">ดูอั้น</button> </div> <div class="flex items-center"> <button id="applyLimitBtn" class="bg-black hover:bg-gray-800 text-white py-1 px-2 text-sm rounded-md shadow mr-2"> อั้น </button> <button id="clearAllButton" class="bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-2 text-sm rounded-md shadow disabled:opacity-50 disabled:cursor-not-allowed mr-2" disabled> ลบรายการทั้งหมด </button> <button id="exportButton" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-md shadow disabled:opacity-50 disabled:cursor-not-allowed" disabled> Export to Excel </button> </div> </div>
+                <div class="mb-3"> <input type="text" id="mainTableSearchInput" class="w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-blue-500 focus:border-blue-500" placeholder="ค้นหาเลขในตาราง..."> </div>
+                <div class="overflow-auto max-h-[55vh]"> <table id="lotteryTable" class="min-w-full bg-white border border-gray-200 rounded-lg shadow"> <thead class="sticky top-0 bg-gray-100 z-10"> <tr> <th class="text-sm font-medium text-gray-600 uppercase tracking-wider">เลข</th> <th class="text-sm font-medium text-gray-600 uppercase tracking-wider">ตัวตรง</th> <th class="text-sm font-medium text-gray-600 uppercase tracking-wider">ตัวโต๊ด</th> <th class="text-sm font-medium text-gray-600 uppercase tracking-wider">อั้น</th> <th class="text-sm font-medium text-gray-600 uppercase tracking-wider">ยอดรวม (บาท)</th> <th class="text-sm font-medium text-gray-600 uppercase tracking-wider">ลบ</th> </tr> </thead> <tbody id="tableBody" class="divide-y divide-gray-200"></tbody> <tfoot class="sticky bottom-0 bg-gray-100 z-10"> <tr> <th class="text-right font-semibold" colspan="1">ยอดรวมทั้งหมด:</th> <th id="totalRegularCell" class="text-center font-semibold">0</th> <th id="totalTodCell" class="text-center font-semibold">0</th> <th id="totalCappedCell" class="text-center font-semibold">0</th> <th id="totalSumCell" class="text-center font-bold text-lg">0</th> <th></th> </tr> </tfoot> </table> </div>
+                 <div id="paginationControls" class="pagination-controls"></div>
+            </div>
+            <div class="lg:col-span-1"> <h2 class="text-xl font-semibold text-gray-800 mb-2">ภาพรวมเลข</h2> <div class="flex space-x-2 mb-2"> <button id="show3DigitButton" class="digit-button flex-1 py-2 px-4 border border-gray-300 rounded-md text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 active">เลข 3 หลัก</button> <button id="show2DigitButton" class="digit-button flex-1 py-2 px-4 border border-gray-300 rounded-md text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">เลข 2 หลัก</button> </div> <div class="mb-2"> <label for="searchInput" class="sr-only">ค้นหาเลข:</label> <input type="text" id="searchInput" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="ค้นหาเลข..."> </div> <div id="rightPanelContainer" class="bg-white border border-gray-200 rounded-lg shadow p-2"> <table id="rightPanelTable" class="min-w-full"> <thead> <tr> <th class="text-xs font-medium text-gray-500 uppercase">เลข</th> <th class="text-xs font-medium text-gray-500 uppercase">ยอดรวม</th> <th class="text-xs font-medium text-gray-500 uppercase">เลขกลับ</th> </tr> </thead> <tbody id="rightPanelBody"></tbody> </table> </div> </div>
+        </div>
+    </div>
+
+    <div id="permutationModal" class="modal"> <div class="modal-content"> <span class="close-button" onclick="closeModal('permutationModal')">&times;</span> <h3 class="text-lg font-semibold mb-4">เลือกเลขกลับสำหรับ <span id="modalNumber" class="font-bold"></span></h3> <div id="permutationList" class="mb-4 max-h-40 overflow-y-auto space-y-2"></div> <div class="flex items-center mb-4"> <input type="checkbox" id="selectAllCheckbox" class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"> <label for="selectAllCheckbox" class="text-sm font-medium text-gray-700">เลือกทั้งหมด</label> </div> <div class="grid grid-cols-2 gap-4 items-center"> <div> <label for="permAmountInput" class="block text-sm font-medium text-gray-700 mb-1">ราคาต่อตัว (บาท):</label> <input type="number" id="permAmountInput" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="ราคา"> </div> <button id="confirmPermAddButton" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-md shadow h-10 mt-5">ยืนยันการเพิ่ม</button> </div> </div> </div>
+    <div id="regularListModal" class="modal"> <div class="modal-content"> <span class="close-button" onclick="closeModal('regularListModal')">&times;</span> <h3 class="text-lg font-semibold mb-3">รายการ ตัวตรง/กลับ</h3> <input type="text" id="regularSearchInput" class="w-full px-3 py-1.5 mb-3 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-blue-500 focus:border-blue-500" placeholder="ค้นหาเลข..."> <div id="regularListContainer" class="max-h-60 overflow-y-auto"></div> </div> </div>
+    <div id="todListModal" class="modal"> <div class="modal-content"> <span class="close-button" onclick="closeModal('todListModal')">&times;</span> <h3 class="text-lg font-semibold mb-3">รายการ ตัวโต๊ด</h3> <input type="text" id="todSearchInput" class="w-full px-3 py-1.5 mb-3 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-blue-500 focus:border-blue-500" placeholder="ค้นหาเลข..."> <div id="todListContainer" class="max-h-60 overflow-y-auto"></div> </div> </div>
+    <div id="confirmModal" class="modal"> <div class="modal-content"> <h3 class="text-lg font-semibold mb-3">ยืนยันการดำเนินการ</h3> <p id="confirmMessage" class="text-gray-700"></p> <div id="confirmButtons"> <button id="confirmCancelButton" class="bg-gray-200 hover:bg-gray-300 text-gray-800">ยกเลิก</button> <button id="confirmOkButton" class="bg-red-500 hover:bg-red-600 text-white">ตกลง</button> </div> </div> </div>
+    <div id="limitModal" class="modal"> <div class="modal-content"> <span class="close-button" onclick="closeModal('limitModal')">&times;</span> <h3 class="text-lg font-semibold mb-3">กำหนดเพดานอั้น</h3> <label for="limitAmountInput" class="block text-sm font-medium text-gray-700 mb-1">ใส่จำนวนที่ต้องการ (ยอดสูงสุดต่อเลข):</label> <input type="number" id="limitAmountInput" min="0" class="w-full px-3 py-2 mb-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="เช่น 300"> <div id="limitButtons" class="text-right"> <button type="button" onclick="closeModal('limitModal')" class="bg-gray-200 hover:bg-gray-300 text-gray-800">ยกเลิก</button> <button id="confirmLimitBtn" class="bg-red-500 hover:bg-red-600 text-white">ยืนยัน</button> </div> </div> </div>
+    <div id="cappedListModal" class="modal"> <div class="modal-content"> <span class="close-button" onclick="closeModal('cappedListModal')">&times;</span> <h3 class="text-lg font-semibold mb-3">รายการยอดอั้น</h3> <input type="text" id="cappedSearchInput" class="w-full px-3 py-1.5 mb-3 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-blue-500 focus:border-blue-500" placeholder="ค้นหาเลข..."> <div id="cappedListContainer" class="max-h-60 overflow-y-auto"> </div> <div class="text-right"> <button id="exportCappedBtn" class="modal-export-button"> Export รายการอั้น </button> </div> </div> </div>
+    <div id="changelogModal" class="modal"> <div class="modal-content"> <span class="close-button" onclick="closeModal('changelogModal')">&times;</span> <h3 class="text-lg font-semibold mb-3">ประวัติการอัปเดต</h3> <div id="changelogContent"> </div> </div> </div>
+
+    <script>
+        // --- DOM Elements ---
+        const numberInput = document.getElementById('numberInput');
+        const permuteButton = document.getElementById('permuteButton');
+        const directAddButton = document.getElementById('directAddButton');
+        const directAmountInput = document.getElementById('directAmountInput');
+        const todAddButton = document.getElementById('todAddButton');
+        const tableBody = document.getElementById('tableBody');
+        const exportButton = document.getElementById('exportButton');
+        const clearAllButton = document.getElementById('clearAllButton');
+        const applyLimitBtn = document.getElementById('applyLimitBtn');
+        const messageArea = document.getElementById('messageArea');
+        const totalRegularCell = document.getElementById('totalRegularCell');
+        const totalTodCell = document.getElementById('totalTodCell');
+        const totalCappedCell = document.getElementById('totalCappedCell');
+        const totalSumCell = document.getElementById('totalSumCell');
+        const permutationModal = document.getElementById('permutationModal');
+        const modalNumber = document.getElementById('modalNumber');
+        const permutationList = document.getElementById('permutationList');
+        const permAmountInput = document.getElementById('permAmountInput');
+        const confirmPermAddButton = document.getElementById('confirmPermAddButton');
+        const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+        const searchInput = document.getElementById('searchInput');
+        const rightPanelContainer = document.getElementById('rightPanelContainer');
+        const rightPanelBody = document.getElementById('rightPanelBody');
+        const show3DigitButton = document.getElementById('show3DigitButton');
+        const show2DigitButton = document.getElementById('show2DigitButton');
+        const showRegularPopupBtn = document.getElementById('showRegularPopupBtn');
+        const showTodPopupBtn = document.getElementById('showTodPopupBtn');
+        const showCappedPopupBtn = document.getElementById('showCappedPopupBtn');
+        const regularListModal = document.getElementById('regularListModal');
+        const todListModal = document.getElementById('todListModal');
+        const cappedListModal = document.getElementById('cappedListModal');
+        const regularSearchInput = document.getElementById('regularSearchInput');
+        const todSearchInput = document.getElementById('todSearchInput');
+        const cappedSearchInput = document.getElementById('cappedSearchInput');
+        const regularListContainer = document.getElementById('regularListContainer');
+        const todListContainer = document.getElementById('todListContainer');
+        const cappedListContainer = document.getElementById('cappedListContainer');
+        const confirmModal = document.getElementById('confirmModal');
+        const confirmMessage = document.getElementById('confirmMessage');
+        const confirmOkButton = document.getElementById('confirmOkButton');
+        const confirmCancelButton = document.getElementById('confirmCancelButton');
+        const limitModal = document.getElementById('limitModal');
+        const limitAmountInput = document.getElementById('limitAmountInput');
+        const confirmLimitBtn = document.getElementById('confirmLimitBtn');
+        const mainInputArea = document.getElementById('mainInputArea');
+        const exportCappedBtn = document.getElementById('exportCappedBtn');
+        const mainTableSearchInput = document.getElementById('mainTableSearchInput');
+        const paginationControls = document.getElementById('paginationControls');
+        const changelogBtn = document.getElementById('changelogBtn');
+        const changelogModal = document.getElementById('changelogModal');
+        const changelogContent = document.getElementById('changelogContent');
+
+        // --- Data Store & State ---
+        let lotteryData = {}; let rightPanelCache = {}; let currentDigits = 3; let lastHighlightedRow = null; let confirmCallback = null;
+        let currentPage = 1;
+        const rowsPerPage = 5;
+        let filteredKeys = [];
+
+        // --- Changelog Data (Cleared as per user request) ---
+        const changelogData = []; // Start with empty log
+
+        // --- Utility Functions ---
+        function formatNumber(numStr, digits) { return numStr.padStart(digits, '0'); }
+        function getPermutations(str) { const inputStr = str; if (inputStr.length === 0) return ['']; const result = new Set(); function findPerms(currentPerm, remainingChars) { if (remainingChars.length === 0) { if (currentPerm.length === inputStr.length) { result.add(currentPerm); } return; } for (let i = 0; i < remainingChars.length; i++) { const char = remainingChars[i]; const nextRemaining = remainingChars.slice(0, i) + remainingChars.slice(i + 1); findPerms(currentPerm + char, nextRemaining); } } findPerms('', inputStr); if (result.size === 0 && inputStr.length > 0) { result.add(inputStr); } return Array.from(result).sort(); }
+        function showMessage(text, isError = false) { messageArea.textContent = text; messageArea.className = `mb-4 text-center min-h-[1.5rem] ${isError ? 'text-red-500' : 'text-green-600'}`; setTimeout(() => { messageArea.textContent = ''; messageArea.className = 'mb-4 text-center min-h-[1.5rem]'; }, 3000); }
+
+         // --- Input Handling ---
+         numberInput.addEventListener('input', () => { const numStr = numberInput.value.trim(); const isValid = /^\d{1,3}$/.test(numStr); permuteButton.disabled = !isValid; directAddButton.disabled = !isValid; directAmountInput.disabled = !isValid; todAddButton.disabled = !isValid; if (!isValid) { directAmountInput.value = ''; } });
+
+        // --- Main Table Logic ---
+        function updateTable() { const searchTerm = mainTableSearchInput.value.toLowerCase().trim(); const allKeys = Object.keys(lotteryData).sort(); filteredKeys = allKeys.filter(key => key.includes(searchTerm)); const totalRows = filteredKeys.length; const totalPages = Math.ceil(totalRows / rowsPerPage); if (currentPage > totalPages && totalPages > 0) { currentPage = totalPages; } else if (currentPage < 1) { currentPage = 1; } const startIndex = (currentPage - 1) * rowsPerPage; tableBody.innerHTML = ''; let grandTotalSum = 0; let grandTotalRegular = 0; let grandTotalTod = 0; let grandTotalCapped = 0; for (let i = 0; i < rowsPerPage; i++) { const rowIndex = startIndex + i; const row = document.createElement('tr'); if (rowIndex < totalRows) { const key = filteredKeys[rowIndex]; const data = lotteryData[key] || { regular: 0, tod: 0, capped: 0 }; const regularAmount = data.regular || 0; const todAmount = data.tod || 0; const cappedAmount = data.capped || 0; const displayTotal = regularAmount + todAmount - cappedAmount; row.id = `row-${key}`; row.className = 'hover:bg-gray-50'; const numCell = document.createElement('td'); numCell.textContent = key; numCell.className = 'font-medium text-gray-900'; row.appendChild(numCell); const regularCell = document.createElement('td'); regularCell.textContent = regularAmount.toLocaleString('th-TH'); regularCell.className = 'text-gray-900'; row.appendChild(regularCell); const todCell = document.createElement('td'); todCell.textContent = todAmount.toLocaleString('th-TH'); todCell.className = 'text-gray-900'; row.appendChild(todCell); const cappedCell = document.createElement('td'); cappedCell.textContent = cappedAmount.toLocaleString('th-TH'); cappedCell.className = 'text-gray-600'; row.appendChild(cappedCell); const totalCell = document.createElement('td'); totalCell.textContent = displayTotal.toLocaleString('th-TH'); totalCell.className = 'text-gray-900 font-semibold'; row.appendChild(totalCell); const deleteCell = document.createElement('td'); const deleteButton = document.createElement('button'); deleteButton.textContent = 'ลบ'; deleteButton.className = 'bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-1 px-2 rounded'; deleteButton.onclick = () => deleteEntry(key); deleteCell.appendChild(deleteButton); row.appendChild(deleteCell); } else { row.className = 'blank-row'; row.innerHTML = '<td colspan="6">&nbsp;</td>'; } tableBody.appendChild(row); } let footerTotalRegular = 0, footerTotalTod = 0, footerTotalCapped = 0, footerTotalSum = 0; filteredKeys.forEach(key => { const data = lotteryData[key] || { regular: 0, tod: 0, capped: 0 }; footerTotalRegular += (data.regular || 0); footerTotalTod += (data.tod || 0); footerTotalCapped += (data.capped || 0); footerTotalSum += (data.regular || 0) + (data.tod || 0) - (data.capped || 0); }); totalRegularCell.textContent = footerTotalRegular.toLocaleString('th-TH'); totalTodCell.textContent = footerTotalTod.toLocaleString('th-TH'); totalCappedCell.textContent = footerTotalCapped.toLocaleString('th-TH'); totalSumCell.textContent = footerTotalSum.toLocaleString('th-TH'); renderPaginationControls(totalPages); const hasAnyData = allKeys.length > 0; exportButton.disabled = !hasAnyData; clearAllButton.disabled = !hasAnyData; applyLimitBtn.disabled = !hasAnyData; }
+
+        // --- Render Pagination Controls ---
+        function renderPaginationControls(totalPages) { paginationControls.innerHTML = ''; if (totalPages <= 1) return; const prevButton = document.createElement('button'); prevButton.textContent = '◀'; prevButton.className = 'pagination-button'; prevButton.disabled = (currentPage === 1); prevButton.onclick = () => { if (currentPage > 1) { currentPage--; updateTable(); } }; paginationControls.appendChild(prevButton); const maxPagesToShow = 5; let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2)); let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1); if(endPage === totalPages) { startPage = Math.max(1, endPage - maxPagesToShow + 1); } if (startPage > 1) { const firstButton = document.createElement('button'); firstButton.textContent = '1'; firstButton.className = 'pagination-button'; firstButton.onclick = () => { currentPage = 1; updateTable(); }; paginationControls.appendChild(firstButton); if (startPage > 2) { const ellipsis = document.createElement('span'); ellipsis.textContent = '...'; ellipsis.className = 'mx-1 text-gray-500'; paginationControls.appendChild(ellipsis); } } for (let i = startPage; i <= endPage; i++) { const pageButton = document.createElement('button'); pageButton.textContent = i; pageButton.className = 'pagination-button'; if (i === currentPage) { pageButton.classList.add('active'); } pageButton.onclick = () => { currentPage = i; updateTable(); }; paginationControls.appendChild(pageButton); } if (endPage < totalPages) { if (endPage < totalPages - 1) { const ellipsis = document.createElement('span'); ellipsis.textContent = '...'; ellipsis.className = 'mx-1 text-gray-500'; paginationControls.appendChild(ellipsis); } const lastButton = document.createElement('button'); lastButton.textContent = totalPages; lastButton.className = 'pagination-button'; lastButton.onclick = () => { currentPage = totalPages; updateTable(); }; paginationControls.appendChild(lastButton); } const nextButton = document.createElement('button'); nextButton.textContent = '▶'; nextButton.className = 'pagination-button'; nextButton.disabled = (currentPage === totalPages); nextButton.onclick = () => { if (currentPage < totalPages) { currentPage++; updateTable(); } }; paginationControls.appendChild(nextButton); }
+
+        // --- Add Entry Logic ---
+        function addEntries(numbersToAdd, amountPerNumber, betType) { if (isNaN(amountPerNumber) || amountPerNumber <= 0) { showMessage('กรุณาใส่จำนวนเงินที่ถูกต้อง (มากกว่า 0)', true); return false; } let addedCount = 0; numbersToAdd.forEach(numStr => { const formattedNum3Digit = formatNumber(numStr, 3); if (!lotteryData[formattedNum3Digit]) { lotteryData[formattedNum3Digit] = { regular: 0, tod: 0, capped: 0 }; } lotteryData[formattedNum3Digit][betType] += amountPerNumber; lotteryData[formattedNum3Digit].capped = 0; updateRightPanelEntry(formattedNum3Digit); addedCount++; }); updateTable(); const typeText = betType === 'tod' ? 'ตัวโต๊ด' : 'ตัวตรง/กลับ'; showMessage(`เพิ่ม ${addedCount} รายการ (${typeText}) จำนวน ${amountPerNumber.toLocaleString('th-TH')} บาท/ตัว สำเร็จ`, false); return true; }
+
+        // --- Button Click Handlers ---
+        directAddButton.addEventListener('click', () => { const numStr = numberInput.value.trim(); const amount = parseInt(directAmountInput.value, 10); if (!/^\d{1,3}$/.test(numStr)) { showMessage('กรุณาใส่เลข 1-3 หลักให้ถูกต้อง', true); numberInput.focus(); return; } if (isNaN(amount) || amount <= 0) { showMessage('กรุณาใส่จำนวนเงินที่ถูกต้อง', true); directAmountInput.focus(); return; } const success = addEntries([numStr], amount, 'regular'); if (success) { numberInput.value = ''; directAmountInput.value = ''; numberInput.focus(); permuteButton.disabled = true; directAddButton.disabled = true; directAmountInput.disabled = true; todAddButton.disabled = true;} });
+        confirmPermAddButton.addEventListener('click', () => { const selectedPerms = Array.from(permutationList.querySelectorAll('.perm-checkbox:checked')).map(cb => cb.value); const amount = parseInt(permAmountInput.value, 10); if (selectedPerms.length === 0) { showMessage('กรุณาเลือกเลขกลับอย่างน้อย 1 ตัว', true); return; } if (isNaN(amount) || amount <= 0) { showMessage('กรุณาใส่ราคาต่อตัวในหน้าต่างเลขกลับ', true); permAmountInput.focus(); return;} const success = addEntries(selectedPerms, amount, 'regular'); if (success) { closeModal('permutationModal'); numberInput.value = ''; directAmountInput.value = ''; numberInput.focus(); permuteButton.disabled = true; directAddButton.disabled = true; directAmountInput.disabled = true; todAddButton.disabled = true;} });
+         todAddButton.addEventListener('click', () => { const numStr = numberInput.value.trim(); const amount = parseInt(directAmountInput.value, 10); if (!/^\d{1,3}$/.test(numStr)) { showMessage('กรุณาใส่เลข 1-3 หลักให้ถูกต้อง', true); numberInput.focus(); return; } if (isNaN(amount) || amount <= 0) { showMessage('กรุณาใส่จำนวนเงินที่ถูกต้อง', true); directAmountInput.focus(); return; } const success = addEntries([numStr], amount, 'tod'); if (success) { numberInput.value = ''; directAmountInput.value = ''; numberInput.focus(); permuteButton.disabled = true; directAddButton.disabled = true; directAmountInput.disabled = true; todAddButton.disabled = true;} });
+
+        // --- Permutation Modal Logic ---
+        permuteButton.addEventListener('click', () => { permAmountInput.value = directAmountInput.value; const numStr = numberInput.value.trim(); if (!/^\d{1,3}$/.test(numStr)) return; const digitsForPermutation = numStr.length < 3 ? 2 : 3; const formattedNumForPerm = formatNumber(numStr, digitsForPermutation); const permutations = getPermutations(formattedNumForPerm); modalNumber.textContent = formattedNumForPerm; permutationList.innerHTML = ''; permutations.forEach(perm => { const div = document.createElement('div'); div.className = 'flex items-center'; const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.id = `perm-${perm}`; checkbox.value = perm; checkbox.checked = true; checkbox.className = 'mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 perm-checkbox'; div.appendChild(checkbox); const label = document.createElement('label'); label.htmlFor = `perm-${perm}`; label.textContent = perm; label.className = 'text-sm'; div.appendChild(label); permutationList.appendChild(div); }); selectAllCheckbox.checked = true; permutationModal.style.display = 'block'; permAmountInput.focus(); });
+        selectAllCheckbox.addEventListener('change', () => { permutationList.querySelectorAll('.perm-checkbox').forEach(cb => cb.checked = selectAllCheckbox.checked); });
+        permutationList.addEventListener('change', (event) => { if (event.target.classList.contains('perm-checkbox')) { const allChecked = Array.from(permutationList.querySelectorAll('.perm-checkbox')).every(cb => cb.checked); selectAllCheckbox.checked = allChecked; } });
+
+        // --- Generic Modal Close Logic ---
+        function closeModal(modalId) { const modal = document.getElementById(modalId); if (modal) { modal.style.display = 'none'; } }
+        window.onclick = function(event) { if (event.target.classList.contains('modal') && event.target.id !== 'confirmModal') { closeModal(event.target.id); } }
+
+        // --- Custom Confirmation Modal Logic ---
+        function showConfirmModal(message, onConfirm) { confirmMessage.textContent = message; confirmCallback = onConfirm; confirmModal.style.display = 'block'; }
+        confirmCancelButton.addEventListener('click', () => { closeModal('confirmModal'); confirmCallback = null; console.log("Custom confirm cancelled."); });
+        confirmOkButton.addEventListener('click', () => { closeModal('confirmModal'); if (typeof confirmCallback === 'function') { console.log("Custom confirm OK clicked, executing callback."); confirmCallback(); } else { console.error("Confirm callback was not a function!"); } confirmCallback = null; });
+
+        // --- Delete Entry Logic ---
+        function deleteEntry(key3Digit) { console.log(`[deleteEntry] Called for key: ${key3Digit}`); const data = lotteryData[key3Digit] || { regular: 0, tod: 0, capped: 0 }; const totalAmountToDelete = data.regular + data.tod; const message = `คุณต้องการลบรายการเลข "${key3Digit}" ทั้งหมดใช่หรือไม่? ยอดรวม ${totalAmountToDelete.toLocaleString('th-TH')} บาท (ตัวตรง ${data.regular.toLocaleString('th-TH')}, โต๊ด ${data.tod.toLocaleString('th-TH')}) จะถูกลบ`; showConfirmModal(message, () => { console.log(`[deleteEntry] Custom confirm OK for key: ${key3Digit}`); try { delete lotteryData[key3Digit]; console.log(`[deleteEntry] lotteryData after delete:`, JSON.parse(JSON.stringify(lotteryData))); updateTable(); updateRightPanelEntry(key3Digit); showMessage(`ลบรายการเลข ${key3Digit} ทั้งหมดสำเร็จ`, false); } catch (error) { console.error(`[deleteEntry] Error during deletion or update for key ${key3Digit}:`, error); showMessage(`เกิดข้อผิดพลาดขณะลบรายการ ${key3Digit}`, true); } }); }
+        // Removed deleteTodAmount function
+
+        // --- Clear All Entries Logic ---
+        function clearAllEntries() { if (Object.keys(lotteryData).length === 0) { showMessage("ไม่มีรายการให้ลบ", true); return; } const message = "คุณต้องการลบรายการทั้งหมด ใช่หรือไม่? การดำเนินการนี้ไม่สามารถย้อนกลับได้"; showConfirmModal(message, () => { console.log("[clearAllEntries] Custom confirm OK"); try { lotteryData = {}; currentPage = 1; updateTable(); populateRightPanel(currentDigits); showMessage("ลบรายการทั้งหมดสำเร็จแล้ว", false); } catch (error) { console.error("[clearAllEntries] Error during clearing:", error); showMessage("เกิดข้อผิดพลาดขณะลบรายการทั้งหมด", true); } }); }
+        clearAllButton.addEventListener('click', clearAllEntries);
+
+        // --- Apply Limit Logic ---
+        applyLimitBtn.addEventListener('click', () => { limitAmountInput.value = ''; limitModal.style.display = 'block'; limitAmountInput.focus(); });
+        confirmLimitBtn.addEventListener('click', () => { const limitAmount = parseInt(limitAmountInput.value, 10); if (isNaN(limitAmount) || limitAmount < 0) { showMessage("กรุณาใส่จำนวนเงินเพดานอั้นที่ถูกต้อง (ตัวเลขมากกว่าหรือเท่ากับ 0)", true); limitAmountInput.focus(); return; } console.log(`[applyLimit] Applying limit: ${limitAmount}`); let changedCount = 0; try { Object.keys(lotteryData).forEach(key => { const data = lotteryData[key]; if (!data) return; const initialTotal = (data.regular || 0) + (data.tod || 0); if (initialTotal > limitAmount) { data.capped = initialTotal - limitAmount; if(data.capped < 0) data.capped = 0; console.log(`[applyLimit] Capping ${key}: total=${initialTotal}, limit=${limitAmount}, capped=${data.capped}`); changedCount++; } else { if ((data.capped || 0) > 0) { console.log(`[applyLimit] Resetting cap for ${key}: total=${initialTotal}, limit=${limitAmount}`); changedCount++; } data.capped = 0; } }); updateTable(); populateRightPanel(currentDigits); closeModal('limitModal'); showMessage(`ใช้เพดานอั้น ${limitAmount.toLocaleString('th-TH')} บาท สำเร็จ (มีการเปลี่ยนแปลง ${changedCount} รายการ)`, false); } catch(error) { console.error("[applyLimit] Error applying limit:", error); showMessage("เกิดข้อผิดพลาดขณะใช้เพดานอั้น", true); } });
+
+        // --- Right Panel Logic ---
+        function populateRightPanel(digits) { currentDigits = digits; rightPanelBody.innerHTML = ''; rightPanelCache = {}; lastHighlightedRow = null; const limit = digits === 2 ? 100 : 1000; for (let i = 0; i < limit; i++) { const numStr = formatNumber(i.toString(), digits); const key3Digit = formatNumber(numStr, 3); const permutations = getPermutations(numStr); const data = lotteryData[key3Digit] || { regular: 0, tod: 0, capped: 0 }; const displayTotal = (data.regular || 0) + (data.tod || 0) - (data.capped || 0); const row = document.createElement('tr'); row.id = `right-row-${numStr}`; row.className = 'hover:bg-gray-100 cursor-pointer'; row.onclick = () => { scrollToNumberInRightPanel(numStr); numberInput.value = numStr; numberInput.dispatchEvent(new Event('input', { bubbles: true })); }; const numCell = document.createElement('td'); numCell.textContent = numStr; row.appendChild(numCell); const amountCell = document.createElement('td'); amountCell.id = `right-amount-${numStr}`; amountCell.textContent = displayTotal.toLocaleString('th-TH'); amountCell.className = displayTotal > 0 ? 'font-semibold text-blue-700' : 'text-gray-500'; row.appendChild(amountCell); const permCell = document.createElement('td'); permCell.className = 'text-xs text-gray-500'; permCell.style.wordBreak = 'break-word'; permutations.forEach((perm, index) => { const span = document.createElement('span'); span.textContent = perm; span.className = 'perm-link'; span.onclick = (event) => { event.stopPropagation(); scrollToNumberInRightPanel(perm); }; permCell.appendChild(span); if (index < permutations.length - 1) { permCell.appendChild(document.createTextNode(', ')); } }); row.appendChild(permCell); rightPanelBody.appendChild(row); rightPanelCache[numStr] = { row: row, perms: permutations }; } show3DigitButton.classList.toggle('active', digits === 3); show2DigitButton.classList.toggle('active', digits === 2); searchInput.value = ''; }
+        function updateRightPanelEntry(key3Digit) { const numStrCurrentFormat = currentDigits === 2 ? key3Digit.slice(-2) : key3Digit; if (rightPanelCache[numStrCurrentFormat]) { const amountCell = document.getElementById(`right-amount-${numStrCurrentFormat}`); const data = lotteryData[key3Digit] || { regular: 0, tod: 0, capped: 0 }; const displayTotal = (data.regular || 0) + (data.tod || 0) - (data.capped || 0); if (amountCell) { amountCell.textContent = displayTotal.toLocaleString('th-TH'); amountCell.className = displayTotal > 0 ? 'font-semibold text-blue-700' : 'text-gray-500'; } } }
+        function clearHighlight() { if(lastHighlightedRow) { lastHighlightedRow.classList.remove('highlight-row'); lastHighlightedRow = null; } }
+        function scrollToNumberInRightPanel(numStr) { if (numStr.length !== currentDigits) { console.warn(`Attempted to scroll to ${numStr} but current view is ${currentDigits} digits.`); return; } clearHighlight(); const targetRow = document.getElementById(`right-row-${numStr}`); if(targetRow) { targetRow.classList.add('highlight-row'); lastHighlightedRow = targetRow; targetRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } else { console.warn(`Right panel row not found for ${numStr}`); } }
+
+        // --- Digit View Buttons ---
+        show3DigitButton.addEventListener('click', () => { if (currentDigits !== 3) { populateRightPanel(3); } });
+        show2DigitButton.addEventListener('click', () => { if (currentDigits !== 2) { populateRightPanel(2); } });
+
+        // --- Search/Filter for Right Panel ---
+        searchInput.addEventListener('input', () => { const searchTerm = searchInput.value.toLowerCase().trim(); let firstMatchNumStr = null; Object.values(rightPanelCache).forEach(item => { item.row.style.display = ''; }); clearHighlight(); if (searchTerm === '') return; const keysInView = Object.keys(rightPanelCache); for (const numStr of keysInView) { if (numStr.startsWith(searchTerm)) { firstMatchNumStr = numStr; break; } } if (firstMatchNumStr) { scrollToNumberInRightPanel(firstMatchNumStr); } });
+
+        // --- Excel Export Logic ---
+        function exportToExcel() { const dataForExport = []; const header = ['เลข', 'ตัวตรง', 'ตัวโต๊ด', 'อั้น', 'ยอดรวม (บาท)']; dataForExport.push(header); let grandTotalRegular = 0; let grandTotalTod = 0; let grandTotalCapped = 0; let grandTotalSum = 0; Object.keys(lotteryData).sort().forEach(key3Digit => { const item = lotteryData[key3Digit] || { regular: 0, tod: 0, capped: 0 }; const regularAmount = item.regular || 0; const todAmount = item.tod || 0; const cappedAmount = item.capped || 0; const displayTotal = regularAmount + todAmount - cappedAmount; dataForExport.push([ key3Digit, regularAmount, todAmount, cappedAmount, displayTotal ]); grandTotalRegular += regularAmount; grandTotalTod += todAmount; grandTotalCapped += cappedAmount; grandTotalSum += displayTotal; }); const totalRowIndex = dataForExport.length; dataForExport.push([]); dataForExport.push(['ยอดรวมทั้งหมด:', grandTotalRegular, grandTotalTod, grandTotalCapped, grandTotalSum]); const ws = XLSX.utils.aoa_to_sheet(dataForExport); const currencyFormat = "#,##0"; try { for (let R = 1; R < totalRowIndex; ++R) { for (let C = 1; C <= 4; ++C) { const cellRef = XLSX.utils.encode_cell({ r: R, c: C }); if (ws[cellRef] && typeof ws[cellRef].v === 'number') { ws[cellRef].t = 'n'; ws[cellRef].z = currencyFormat; } } } const finalTotalRowIndex = totalRowIndex + 1; for (let C = 1; C <= 4; ++C) { const cellRef = XLSX.utils.encode_cell({ r: finalTotalRowIndex, c: C }); if (ws[cellRef] && typeof ws[cellRef].v === 'number') { ws[cellRef].t = 'n'; ws[cellRef].z = currencyFormat; if (!ws[cellRef].s) ws[cellRef].s = {}; ws[cellRef].s.font = { bold: true }; } } const totalLabelRef = XLSX.utils.encode_cell({ r: finalTotalRowIndex, c: 0 }); if(ws[totalLabelRef]) { if (!ws[totalLabelRef].s) ws[totalLabelRef].s = {}; ws[totalLabelRef].s.font = { bold: true }; } header.forEach((h, C) => { const cellRef = XLSX.utils.encode_cell({ r: 0, c: C }); if (ws[cellRef]) { if (!ws[cellRef].s) ws[cellRef].s = {}; ws[cellRef].s.font = { bold: true }; } }); } catch (e) { console.error("Error applying basic Excel formatting:", e); } ws['!cols'] = [{ wch: 15 }, { wch: 18 }, { wch: 18 }, { wch: 18 }, { wch: 20 }]; const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'รายการทั้งหมด'); const fileName = `รายการทั้งหมด_${new Date().toISOString().slice(0,10)}.xlsx`; XLSX.writeFile(wb, fileName); showMessage('Export ข้อมูลเป็น Excel สำเร็จ', false); }
+        exportButton.addEventListener('click', exportToExcel);
+
+        // --- Export Capped List Logic ---
+        function exportCappedListToExcel() { const dataForCappedExport = []; const header = ['เลข', 'จำนวนเงิน']; dataForCappedExport.push(header); let totalCappedAmount = 0; let hasCappedData = false; Object.keys(lotteryData).sort().forEach(key => { const data = lotteryData[key]; const cappedAmount = data ? (data.capped || 0) : 0; if (cappedAmount > 0) { dataForCappedExport.push([key, cappedAmount]); totalCappedAmount += cappedAmount; hasCappedData = true; } }); if (!hasCappedData) { showMessage("ไม่มียอดอั้นให้ Export", true); return; } const totalRowIndex = dataForCappedExport.length; dataForCappedExport.push([]); dataForCappedExport.push(['ยอดรวมทั้งหมด:', totalCappedAmount]); const ws = XLSX.utils.aoa_to_sheet(dataForCappedExport); const currencyFormat = "#,##0"; try { for (let R = 1; R < totalRowIndex; ++R) { const cellRef = XLSX.utils.encode_cell({ r: R, c: 1 }); if (ws[cellRef] && typeof ws[cellRef].v === 'number') { ws[cellRef].t = 'n'; ws[cellRef].z = currencyFormat; } } const finalTotalRowIndex = totalRowIndex + 1; const totalAmountRef = XLSX.utils.encode_cell({ r: finalTotalRowIndex, c: 1 }); if (ws[totalAmountRef] && typeof ws[totalAmountRef].v === 'number') { ws[totalAmountRef].t = 'n'; ws[totalAmountRef].z = currencyFormat; if (!ws[totalAmountRef].s) ws[totalAmountRef].s = {}; ws[totalAmountRef].s.font = { bold: true }; } const totalLabelRef = XLSX.utils.encode_cell({ r: finalTotalRowIndex, c: 0 }); if(ws[totalLabelRef]) { if (!ws[totalLabelRef].s) ws[totalLabelRef].s = {}; ws[totalLabelRef].s.font = { bold: true }; } header.forEach((h, C) => { const cellRef = XLSX.utils.encode_cell({ r: 0, c: C }); if (ws[cellRef]) { if (!ws[cellRef].s) ws[cellRef].s = {}; ws[cellRef].s.font = { bold: true }; } }); } catch (e) { console.error("Error applying capped list Excel formatting:", e); } ws['!cols'] = [{ wch: 15 }, { wch: 18 }]; const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'รายการยอดอั้น'); const fileName = `รายการยอดอั้น_${new Date().toISOString().slice(0,10)}.xlsx`; XLSX.writeFile(wb, fileName); showMessage('Export รายการยอดอั้นสำเร็จ', false); }
+        exportCappedBtn.addEventListener('click', exportCappedListToExcel);
+
+         // --- Enter Key Handling ---
+         numberInput.addEventListener('keypress', function(event) { if (event.key === 'Enter') { event.preventDefault(); const numStr = numberInput.value.trim(); if (/^\d{1,3}$/.test(numStr)) { if (!directAmountInput.disabled) { directAmountInput.focus(); } } } });
+         directAmountInput.addEventListener('keypress', function(event) { // Enter in amount -> click Direct Add
+             if (event.key === 'Enter') { event.preventDefault(); if (!directAddButton.disabled) directAddButton.click(); }
+         });
+         // Removed Tod Amount Enter Key Listener
+         permAmountInput.addEventListener('keypress', function(event) { if (event.key === 'Enter') { event.preventDefault(); confirmPermAddButton.click(); } });
+
+         // --- Summary Modal Logic ---
+         function populateSummaryModal(modalContainer, dataKey, title) { modalContainer.innerHTML = ''; let count = 0; const sortedKeys = Object.keys(lotteryData).sort(); sortedKeys.forEach(key => { const data = lotteryData[key]; const amount = data ? (data[dataKey] || 0) : 0; if (amount > 0) { const div = document.createElement('div'); div.className = 'summary-list-item flex justify-between'; div.dataset.number = key; const numSpan = document.createElement('span'); numSpan.textContent = `${key}:`; numSpan.className = 'font-medium mr-2'; const amountSpan = document.createElement('span'); amountSpan.textContent = `${amount.toLocaleString('th-TH')} บาท`; div.appendChild(numSpan); div.appendChild(amountSpan); modalContainer.appendChild(div); count++; } }); if (count === 0) { modalContainer.innerHTML = '<p class="text-center text-gray-500 py-4">ไม่มีรายการ</p>'; } }
+         showRegularPopupBtn.addEventListener('click', () => { populateSummaryModal(regularListContainer, 'regular', 'รายการ ตัวตรง/กลับ'); regularSearchInput.value = ''; regularListModal.style.display = 'block'; regularSearchInput.focus(); });
+         showTodPopupBtn.addEventListener('click', () => { populateSummaryModal(todListContainer, 'tod', 'รายการ ตัวโต๊ด'); todSearchInput.value = ''; todListModal.style.display = 'block'; todSearchInput.focus(); });
+         showCappedPopupBtn.addEventListener('click', () => { populateSummaryModal(cappedListContainer, 'capped', 'รายการยอดอั้น'); cappedSearchInput.value = ''; cappedListModal.style.display = 'block'; cappedSearchInput.focus(); });
+         function filterSummaryList(searchInput, listContainer) { const searchTerm = searchInput.value.toLowerCase(); const items = listContainer.querySelectorAll('.summary-list-item'); items.forEach(item => { const number = item.dataset.number || ''; if (number.includes(searchTerm)) { item.style.display = 'flex'; } else { item.style.display = 'none'; } }); }
+         regularSearchInput.addEventListener('input', () => { filterSummaryList(regularSearchInput, regularListContainer); });
+         todSearchInput.addEventListener('input', () => { filterSummaryList(todSearchInput, todListContainer); });
+         cappedSearchInput.addEventListener('input', () => { filterSummaryList(cappedSearchInput, cappedListContainer); });
+
+         // --- Quick Price Button Logic (Additive) ---
+         mainInputArea.addEventListener('click', function(event) { if (event.target.classList.contains('quick-price-btn')) { const button = event.target; const amountToAdd = parseInt(button.dataset.amount, 10); const targetInputId = button.dataset.targetInput; const targetInput = document.getElementById(targetInputId); if (targetInput && !isNaN(amountToAdd)) { if (!targetInput.disabled) { const currentValue = parseInt(targetInput.value, 10) || 0; const newValue = currentValue + amountToAdd; targetInput.value = newValue; targetInput.dispatchEvent(new Event('input', { bubbles: true })); targetInput.focus(); } else { console.log("Quick price button ignored: Target input disabled."); } } } });
+
+        // --- Main Table Search Logic ---
+        mainTableSearchInput.addEventListener('input', () => { currentPage = 1; updateTable(); });
+
+        // --- Changelog Modal Logic ---
+         function populateChangelogModal() {
+             changelogContent.innerHTML = ''; // Clear previous content
+             if (changelogData && changelogData.length > 0) {
+                 changelogData.forEach(entry => {
+                     const versionDiv = document.createElement('div');
+
+                     const title = document.createElement('h4');
+                     title.textContent = `เวอร์ชัน ${entry.version} (${entry.date})`;
+                     versionDiv.appendChild(title);
+
+                     const list = document.createElement('ul');
+                     entry.changes.forEach(change => {
+                         const item = document.createElement('li');
+                         item.textContent = change;
+                         list.appendChild(item);
+                     });
+                     versionDiv.appendChild(list);
+                     changelogContent.appendChild(versionDiv);
+                 });
+             } else {
+                 changelogContent.innerHTML = '<p class="text-center text-gray-500">ไม่มีประวัติการอัปเดต</p>';
+             }
+         }
+         changelogBtn.addEventListener('click', () => {
+             populateChangelogModal();
+             changelogModal.style.display = 'block';
+         });
+
+
+        // --- Initial Setup ---
+        populateRightPanel(currentDigits);
+        updateTable(); // Initial table render
+    </script>
+
+</body>
+</html>
