@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        /* ... (CSS styles remain the same) ... */
+        /* ... (CSS styles remain the same, removed #changelogBtn rule) ... */
         body { font-family: 'Tahoma', 'sans-serif'; }
         table th, table td { padding: 8px 10px; text-align: center; border: 1px solid #e2e8f0; white-space: nowrap; }
         table th { background-color: #f1f5f9; }
@@ -47,8 +47,7 @@
         .pagination-button:disabled { opacity: 0.5; cursor: not-allowed; }
         .blank-row td { color: transparent; }
         .blank-row:hover { background-color: transparent !important; }
-        #changelogBtn { position: absolute; bottom: 10px; right: 15px; font-size: 0.75rem; color: #6b7280; cursor: pointer; text-decoration: none; border: none; background: none; padding: 5px; }
-        #changelogBtn:hover { color: #1f2937; text-decoration: underline; }
+        /* Removed #changelogBtn style */
         #changelogModal .modal-content { max-width: 500px; }
         #changelogContent { max-height: 60vh; overflow-y: auto; }
         #changelogContent h4 { font-size: 1rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; border-bottom: 1px solid #eee; padding-bottom: 0.25rem; }
@@ -62,7 +61,9 @@
         <div class="absolute top-2 right-3 text-xs text-gray-400">
             ตูนล้อโต Designed by Shiro
         </div>
-        <button id="changelogBtn">ประวัติอัปเดต</button>
+        <button id="changelogBtn" class="absolute bottom-4 right-4 text-xs text-gray-500 hover:text-gray-800 hover:underline cursor-pointer border-none bg-transparent p-1">
+            Patch Note
+        </button>
 
         <h1 class="text-2xl md:text-3xl font-bold mb-6 text-center text-blue-600 pt-2">ตูนล้อโต 2.0.0</h1>
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -146,8 +147,8 @@
         const rowsPerPage = 5;
         let filteredKeys = [];
 
-        // --- Changelog Data (Cleared as per user request) ---
-        const changelogData = []; // Start with empty log
+        // --- Changelog Data (Cleared) ---
+        const changelogData = [];
 
         // --- Utility Functions ---
         function formatNumber(numStr, digits) { return numStr.padStart(digits, '0'); }
@@ -248,11 +249,9 @@
              if (changelogData && changelogData.length > 0) {
                  changelogData.forEach(entry => {
                      const versionDiv = document.createElement('div');
-
                      const title = document.createElement('h4');
                      title.textContent = `เวอร์ชัน ${entry.version} (${entry.date})`;
                      versionDiv.appendChild(title);
-
                      const list = document.createElement('ul');
                      entry.changes.forEach(change => {
                          const item = document.createElement('li');
