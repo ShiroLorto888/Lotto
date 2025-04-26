@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>โปรแกรมคิดเลขหวย v64 (Export แล้วลบเลขเกิน)</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>โปรแกรมคิดเลขหวย v64.7 (แก้ไข Boxed Modal แบบ Checkbox + Input)</title> <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -45,14 +44,16 @@
         .limit-indicator { position: absolute; top: 0.75rem; right: 1.25rem; font-size: 1rem; color: #dc2626; font-weight: 600; }
         .limit-indicator .clear-limit-btn { color: #3b82f6; text-decoration: underline; margin-left: 0.75rem; cursor: pointer; font-size: 0.875rem; }
          .limit-indicator .clear-limit-btn:hover { color: #1d4ed8; }
-         input[type=text], input[type=number] { padding: 0.6rem 0.75rem; font-size: 1.1rem; border: 1px solid #d1d5db; }
+         input[type=text], input[type=number] { padding: 0.6rem 0.75rem; font-size: 1.1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; }
          label { font-size: 1rem; margin-bottom: 0.3rem; }
          h1 { font-size: 1.75rem; margin-bottom: 1.75rem; }
          .modal-content h2 { font-size: 1.4rem; margin-bottom: 1.25rem; }
-         /* Style for Boxed Modal Checkboxes */
-         .boxed-option { display: flex; align-items: center; margin-bottom: 0.75rem; }
-         .boxed-option input[type="checkbox"] { height: 1.2rem; width: 1.2rem; margin-right: 0.75rem; }
-         .boxed-option label { font-size: 1.1rem; font-weight: 500; }
+         .modal-input { border: 1px solid #d1d5db; border-radius: 0.375rem; px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-lg; padding: 0.6rem 0.75rem;}
+        /* Style for Boxed Modal Checkbox + Input */
+        .boxed-price-option { display: flex; align-items: center; margin-bottom: 1rem; gap: 0.75rem; }
+        .boxed-price-option input[type="checkbox"] { height: 1.2rem; width: 1.2rem; flex-shrink: 0; }
+        .boxed-price-option label { font-size: 1.1rem; font-weight: 500; flex-shrink: 0; min-width: 60px; /* Adjust as needed */ }
+        .boxed-price-option input[type="number"] { flex-grow: 1; } /* Make input take remaining space */
     </style>
 </head>
 <body class="bg-gray-100 pb-20">
@@ -67,6 +68,8 @@
                 <button id="menuRun2Top" data-page="pageRun2Top" class="menu-item">วิ่ง2ตัวบน</button>
                 <button id="menuPack4" data-page="pagePack4" class="menu-item">แพ4ตัว</button>
                 <button id="menuPack5" data-page="pagePack5" class="menu-item">แพ5ตัว</button>
+                <button id="menuCloseNumbers" data-page="pageCloseNumbers" class="menu-item">ตัวปิด</button>
+                <button id="menuCloseNumbers2digit" data-page="pageCloseNumbers2digit" class="menu-item">ตัวปิด2หลัก</button>
             </div>
             <div class="relative">
                 <button id="hamburgerBtn" class="text-gray-300 focus:outline-none">
@@ -131,7 +134,7 @@
 
         <div id="page2digitTop" class="page-content">
              <div class="max-w-6xl mx-auto bg-white p-8 rounded-lg shadow-lg relative">
-                 <div id="limitIndicator2digitTop" class="limit-indicator hidden"></div>
+                <div id="limitIndicator2digitTop" class="limit-indicator hidden"></div>
                 <h1 class="text-3xl font-bold text-indigo-700 mb-8 text-center">2 ตัวบน</h1>
                 <div class="input-section mb-8 p-6 bg-gray-50 rounded-md border border-gray-200 flex flex-wrap items-end gap-6">
                     <div>
@@ -173,7 +176,7 @@
 
         <div id="page2digitBottom" class="page-content">
              <div class="max-w-6xl mx-auto bg-white p-8 rounded-lg shadow-lg relative">
-                 <div id="limitIndicator2digitBottom" class="limit-indicator hidden"></div>
+                <div id="limitIndicator2digitBottom" class="limit-indicator hidden"></div>
                 <h1 class="text-3xl font-bold text-indigo-700 mb-8 text-center">2 ตัวล่าง</h1>
                 <div class="input-section mb-8 p-6 bg-gray-50 rounded-md border border-gray-200 flex flex-wrap items-end gap-6">
                     <div>
@@ -216,7 +219,7 @@
 
          <div id="pageRunTop" class="page-content">
              <div class="max-w-6xl mx-auto bg-white p-8 rounded-lg shadow-lg relative">
-                 <div id="limitIndicatorRunTop" class="limit-indicator hidden"></div>
+                <div id="limitIndicatorRunTop" class="limit-indicator hidden"></div>
                 <h1 class="text-3xl font-bold text-indigo-700 mb-8 text-center">วิ่งบน</h1>
                 <div class="input-section mb-8 p-6 bg-gray-50 rounded-md border border-gray-200 flex flex-wrap items-end gap-6">
                     <div>
@@ -257,7 +260,7 @@
 
         <div id="pageRunBottom" class="page-content">
              <div class="max-w-6xl mx-auto bg-white p-8 rounded-lg shadow-lg relative">
-                 <div id="limitIndicatorRunBottom" class="limit-indicator hidden"></div>
+                <div id="limitIndicatorRunBottom" class="limit-indicator hidden"></div>
                 <h1 class="text-3xl font-bold text-indigo-700 mb-8 text-center">วิ่งล่าง</h1>
                 <div class="input-section mb-8 p-6 bg-gray-50 rounded-md border border-gray-200 flex flex-wrap items-end gap-6">
                     <div>
@@ -298,7 +301,7 @@
 
         <div id="pageRun2Top" class="page-content">
              <div class="max-w-6xl mx-auto bg-white p-8 rounded-lg shadow-lg relative">
-                 <div id="limitIndicatorRun2Top" class="limit-indicator hidden"></div>
+                <div id="limitIndicatorRun2Top" class="limit-indicator hidden"></div>
                 <h1 class="text-3xl font-bold text-indigo-700 mb-8 text-center">วิ่ง 2 ตัวบน</h1>
                 <div class="input-section mb-8 p-6 bg-gray-50 rounded-md border border-gray-200 flex flex-wrap items-end gap-6">
                     <div>
@@ -340,7 +343,7 @@
 
         <div id="pagePack4" class="page-content">
              <div class="max-w-6xl mx-auto bg-white p-8 rounded-lg shadow-lg relative">
-                 <div id="limitIndicatorPack4" class="limit-indicator hidden"></div>
+                <div id="limitIndicatorPack4" class="limit-indicator hidden"></div>
                 <h1 class="text-3xl font-bold text-indigo-700 mb-8 text-center">แพ 4 ตัว</h1>
                 <div class="input-section mb-8 p-6 bg-gray-50 rounded-md border border-gray-200 flex flex-wrap items-end gap-6">
                     <div>
@@ -381,7 +384,7 @@
 
         <div id="pagePack5" class="page-content">
              <div class="max-w-6xl mx-auto bg-white p-8 rounded-lg shadow-lg relative">
-                 <div id="limitIndicatorPack5" class="limit-indicator hidden"></div>
+                <div id="limitIndicatorPack5" class="limit-indicator hidden"></div>
                 <h1 class="text-3xl font-bold text-indigo-700 mb-8 text-center">แพ 5 ตัว</h1>
                 <div class="input-section mb-8 p-6 bg-gray-50 rounded-md border border-gray-200 flex flex-wrap items-end gap-6">
                     <div>
@@ -507,6 +510,72 @@
             </div>
         </div>
 
+        <div id="pageCloseNumbers" class="page-content">
+            <div class="max-w-6xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+                <h1 class="text-3xl font-bold text-indigo-700 mb-8 text-center">ตัวปิด</h1>
+                <div class="input-section mb-8 p-6 bg-gray-50 rounded-md border border-gray-200 flex flex-wrap items-end gap-6">
+                    <div>
+                        <label for="closeNumberInput" class="block text-base font-medium text-gray-700 mb-2">ป้อนเลข 3 หลักที่ต้องการปิด:</label>
+                        <input type="text" id="closeNumberInput" maxlength="3" pattern="\d{3}"
+                               class="border border-gray-300 rounded-md px-4 py-3 w-32 text-center text-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                               placeholder="000">
+                    </div>
+                    <div class="button-group flex flex-wrap gap-3 mt-5 sm:mt-0 sm:ml-6">
+                        <button id="btnAddCloseNumber" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-5 rounded-md shadow transition duration-150">เพิ่มเลขปิด</button>
+                        <button id="btnDeleteAllCloseNumbers" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-5 rounded-md shadow transition duration-150">ลบเลขปิดทั้งหมด</button>
+                    </div>
+                </div>
+                <div class="table-section mb-8 overflow-x-auto">
+                    <table id="closeNumbersTable" class="min-w-full bg-white border border-gray-300 rounded-md">
+                        <thead class="bg-gray-200">
+                            <tr>
+                                <th class="border-b text-left font-bold text-gray-600">เลขปิด</th>
+                                <th class="border-b text-center font-bold text-gray-600">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="closeNumbersTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="pageCloseNumbers2digit" class="page-content">
+            <div class="max-w-6xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+                <h1 class="text-3xl font-bold text-indigo-700 mb-8 text-center">ตัวปิด 2 หลัก</h1>
+                <div class="input-section mb-8 p-6 bg-gray-50 rounded-md border border-gray-200 flex flex-wrap items-end gap-6">
+                    <div>
+                        <label for="closeNumberInput2digit" class="block text-base font-medium text-gray-700 mb-2">ป้อนเลข 2 หลักที่ต้องการปิด:</label>
+                        <input type="text" id="closeNumberInput2digit" maxlength="2" pattern="\d{2}"
+                               class="border border-gray-300 rounded-md px-4 py-3 w-28 text-center text-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                               placeholder="00">
+                    </div>
+                    <div class="button-group flex flex-wrap gap-3 mt-5 sm:mt-0 sm:ml-6">
+                        <button id="btnAddCloseNumber2digit" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-5 rounded-md shadow transition duration-150">เพิ่มเลขปิด</button>
+                        <button id="btnDeleteAllCloseNumbers2digit" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-5 rounded-md shadow transition duration-150">ลบเลขปิดทั้งหมด</button>
+                    </div>
+                </div>
+                <div class="table-section mb-8 overflow-x-auto">
+                    <table id="closeNumbersTable2digit" class="min-w-full bg-white border border-gray-300 rounded-md">
+                        <thead class="bg-gray-200">
+                            <tr>
+                                <th class="border-b text-left font-bold text-gray-600">เลขปิด</th>
+                                <th class="border-b text-center font-bold text-gray-600">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="closeNumbersTableBody2digit"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="grandTotalSummarySection">
+                <h1 class="text-3xl font-bold text-indigo-700 mb-8 text-center">ดูตัวปิด</h1>
+                <p class="text-center text-gray-600">เนื้อหาสำหรับเมนู "ดูตัวปิด" จะถูกเพิ่มที่นี่</p>
+            </div>
+        </div>
+
     </div>
 
     <div id="grandTotalSummarySection">
@@ -528,7 +597,7 @@
             <div id="mainModalPriceContainer" class="space-y-4">
                 <div>
                     <label for="modalPriceInput" class="block text-base font-medium text-gray-700 mb-2">ราคาอั้นสูงสุด:</label>
-                    <input type="number" id="modalPriceInput" step="any" class="border border-gray-300 rounded-md px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-lg" placeholder="0.00">
+                    <input type="number" id="modalPriceInput" step="any" class="modal-input w-full" placeholder="0.00">
                 </div>
             </div>
             <div class="flex justify-end gap-4 mt-8">
@@ -544,11 +613,11 @@
             <div class="space-y-4 mb-5">
                 <div>
                     <label for="editStraightInput" class="block text-base font-medium text-gray-700 mb-2">ราคา (ตั้งต้น):</label>
-                    <input type="number" id="editStraightInput" step="any" class="border border-gray-300 rounded-md px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-lg" placeholder="0.00">
+                    <input type="number" id="editStraightInput" step="any" class="modal-input w-full" placeholder="0.00">
                 </div>
                 <div id="editBoxedContainer">
                     <label for="editBoxedInput" class="block text-base font-medium text-gray-700 mb-2">ราคาโต๊ด:</label>
-                    <input type="number" id="editBoxedInput" step="any" class="border border-gray-300 rounded-md px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-lg" placeholder="0.00">
+                    <input type="number" id="editBoxedInput" step="any" class="modal-input w-full" placeholder="0.00">
                 </div>
             </div>
             <div class="flex justify-end gap-4">
@@ -560,18 +629,18 @@
 
     <div id="boxedModal" class="modal">
         <div class="modal-content">
-            <h2 id="boxedModalTitle" class="text-2xl font-bold mb-5">เพิ่มเลขโต๊ด ...</h2>
-            <p class="mb-4 text-base">ราคาตั้งต้น: <span id="boxedModalPrice" class="font-semibold">0.00</span></p>
-            <p class="mb-5 text-base">เลือกประเภทราคาที่จะเพิ่ม:</p>
-            <div class="space-y-3 mb-6">
-                <div class="boxed-option">
-                    <input type="checkbox" id="boxedModalStraightCheck" checked>
-                    <label for="boxedModalStraightCheck">ตัวตรง</label>
-                </div>
-                <div class="boxed-option">
-                    <input type="checkbox" id="boxedModalBoxedCheck" checked>
-                    <label for="boxedModalBoxedCheck">ตัวโต๊ด</label>
-                </div>
+            <h2 id="boxedModalTitle" class="text-2xl font-bold mb-5">เพิ่ม/แก้ไข เลข ...</h2>
+            <div class="space-y-4 mb-6">
+                 <div class="boxed-price-option">
+                     <input type="checkbox" id="boxedModalStraightCheck" checked>
+                     <label for="boxedModalStraightCheck">ตัวตรง</label>
+                     <input type="number" id="boxedModalStraightPriceInput" step="any" class="modal-input" placeholder="0.00">
+                 </div>
+                 <div class="boxed-price-option">
+                     <input type="checkbox" id="boxedModalBoxedCheck" checked>
+                     <label for="boxedModalBoxedCheck">ตัวโต๊ด</label>
+                     <input type="number" id="boxedModalBoxedPriceInput" step="any" class="modal-input" placeholder="0.00">
+                 </div>
             </div>
             <div class="flex justify-end gap-4">
                 <button id="boxedModalCancelBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 px-6 rounded-md transition duration-150 text-base">ยกเลิก</button>
@@ -583,7 +652,7 @@
 
     <script>
         // --- DOM Elements ---
-        // ... (Keep all previous DOM element references from v58) ...
+        // ... (Keep all previous DOM element references) ...
         const pageContainer = document.getElementById('pageContainer');
         const allPageContents = document.querySelectorAll('.page-content');
         const menuItems = document.querySelectorAll('.menu-item[data-page]');
@@ -705,17 +774,28 @@
         const editBoxedContainer = document.getElementById('editBoxedContainer');
         const editModalOkBtn = document.getElementById('editModalOkBtn');
         const editModalCancelBtn = document.getElementById('editModalCancelBtn');
-        // NEW: Boxed Modal Elements
+        // UPDATED: Boxed Modal Elements (Checkbox + Input version)
         const boxedModal = document.getElementById('boxedModal');
         const boxedModalTitle = document.getElementById('boxedModalTitle');
-        const boxedModalPrice = document.getElementById('boxedModalPrice');
-        const boxedModalStraightCheck = document.getElementById('boxedModalStraightCheck');
-        const boxedModalBoxedCheck = document.getElementById('boxedModalBoxedCheck');
+        const boxedModalStraightCheck = document.getElementById('boxedModalStraightCheck'); // Checkbox
+        const boxedModalStraightPriceInput = document.getElementById('boxedModalStraightPriceInput'); // Input for straight
+        const boxedModalBoxedCheck = document.getElementById('boxedModalBoxedCheck');     // Checkbox
+        const boxedModalBoxedPriceInput = document.getElementById('boxedModalBoxedPriceInput');   // Input for boxed
         const boxedModalOkBtn = document.getElementById('boxedModalOkBtn');
         const boxedModalCancelBtn = document.getElementById('boxedModalCancelBtn');
         // Grand Total Summary
         const grandTotalSummarySection = document.getElementById('grandTotalSummarySection');
+        // Close Numbers
+        const closeNumberInput = document.getElementById('closeNumberInput');
+        const btnAddCloseNumber = document.getElementById('btnAddCloseNumber');
+        const btnDeleteAllCloseNumbers = document.getElementById('btnDeleteAllCloseNumbers');
+        const closeNumbersTableBody = document.getElementById('closeNumbersTableBody');
 
+        // Close Numbers 2 Digit
+        const closeNumberInput2digit = document.getElementById('closeNumberInput2digit');
+        const btnAddCloseNumber2digit = document.getElementById('btnAddCloseNumber2digit');
+        const btnDeleteAllCloseNumbers2digit = document.getElementById('btnDeleteAllCloseNumbers2digit');
+        const closeNumbersTableBody2digit = document.getElementById('closeNumbersTableBody2digit');
 
         // --- Data Storage ---
         let lottoData3digit = {};
@@ -727,8 +807,10 @@
         let lottoDataPack4 = {};
         let lottoDataPack5 = {};
         let limitThresholds = {};
-        const LOCAL_STORAGE_KEY_PREFIX = 'lottoCalculatorData_v64_'; // Increment version
-        const LIMIT_STORAGE_KEY = 'lottoLimitThresholds_v64'; // Increment version
+        let closedNumbers = [];
+        let closedNumbers2digit = [];
+        const LOCAL_STORAGE_KEY_PREFIX = 'lottoCalculatorData_v64.7_'; // Increment version
+        const LIMIT_STORAGE_KEY = 'lottoLimitThresholds_v64.7'; // Increment version
         let currentPageType = '3digit';
 
         // --- Utility Functions ---
@@ -746,9 +828,9 @@
                  return Array.from(r).sort();
              }
              return [numberStr];
-        }
+         }
 
-        function validateNDigitInput(s, n) { /* ... (unchanged from v63) ... */
+        function validateNDigitInput(s, n) { /* ... (unchanged) ... */
              if (n === 'RunTop' || n === 'RunBottom') {
                  return /^\d{1}$/.test(s);
              }
@@ -765,41 +847,63 @@
                 return regex.test(s);
              }
              return false;
-        }
+         }
 
         function validatePriceInput(s) { /* ... (unchanged) ... */ if (s === null || s === undefined) return false; const t = String(s).trim(); if (t === '') return false; const n = Number(t); return !isNaN(n) && isFinite(n); }
         function formatPrice(p) { /* ... (unchanged) ... */ const n = Number(p); return isNaN(n) ? '0.00' : n.toFixed(2); }
         function highlightError(element, add = true) { /* ... (unchanged) ... */ if(add) { element.classList.add('input-error'); } else { element.classList.remove('input-error'); } }
+        function isNumberClosed(number) {
+            return closedNumbers.includes(number);
+        }
+        function isNumberClosed2digit(number) {
+            return closedNumbers2digit.includes(number);
+        }
 
         // --- Local Storage Functions ---
-        function loadData(type) { /* ... (unchanged) ... */
+        function loadData(type) { /* ... (unchanged, includes structure check) ... */
             const key = LOCAL_STORAGE_KEY_PREFIX + type;
             const data = localStorage.getItem(key);
             let loadedDataObject = {};
             if (data) {
-                 try {
-                     loadedDataObject = JSON.parse(data);
-                 } catch (e) { console.error("Error parsing data from localStorage:", e); loadedDataObject = {}; }
+                try {
+                    loadedDataObject = JSON.parse(data);
+                } catch (e) { console.error("Error parsing data from localStorage:", e); loadedDataObject = {}; }
             }
+            // Ensure loaded data has correct structure
+            Object.keys(loadedDataObject).forEach(num => {
+                if (typeof loadedDataObject[num] !== 'object' || loadedDataObject[num] === null) {
+                    loadedDataObject[num] = { straight: 0, boxed: 0 };
+                } else {
+                    if (typeof loadedDataObject[num].straight !== 'number') {
+                        loadedDataObject[num].straight = 0;
+                    }
+                    if (typeof loadedDataObject[num].boxed !== 'number') {
+                         loadedDataObject[num].boxed = 0;
+                    }
+                }
+            });
             return loadedDataObject;
         }
         function saveData(type, dataObject) { /* ... (unchanged) ... */
              const key = LOCAL_STORAGE_KEY_PREFIX + type;
              try { localStorage.setItem(key, JSON.stringify(dataObject)); } catch (e) { console.error("Error saving data to localStorage:", e); }
-        }
-        function loadLimitThresholds() { /* ... (unchanged) ... */
+         }
+        function loadLimitThresholds() { /* ... (unchanged, includes structure check) ... */
             const data = localStorage.getItem(LIMIT_STORAGE_KEY);
             let loadedLimits = {};
             if (data) {
                 try {
                     loadedLimits = JSON.parse(data);
+                    if(typeof loadedLimits !== 'object' || loadedLimits === null) {
+                        loadedLimits = {};
+                    }
                 } catch (e) { console.error("Error parsing limits from localStorage:", e); loadedLimits = {}; }
             }
             return loadedLimits;
         }
         function saveLimitThresholds() { /* ... (unchanged) ... */
              try { localStorage.setItem(LIMIT_STORAGE_KEY, JSON.stringify(limitThresholds)); } catch (e) { console.error("Error saving limits to localStorage:", e); }
-        }
+         }
 
         // --- GUI Update Functions ---
         function updateTable(type) { /* ... (unchanged logic) ... */
@@ -823,8 +927,8 @@
 
             sortedKeys.forEach(num => {
                 const itemData = data[num];
-                const straightOriginal = Number(itemData.straight) || 0;
-                const boxedOriginal = Number(itemData.boxed) || 0;
+                const straightOriginal = Number(itemData?.straight) || 0;
+                const boxedOriginal = Number(itemData?.boxed) || 0;
                 let straightDisplay = straightOriginal, boxedDisplay = boxedOriginal, limitStraightDisplay = 0, limitBoxedDisplay = 0;
 
                 if (limitThresholdStraight > 0 && straightOriginal > limitThresholdStraight) {
@@ -857,11 +961,11 @@
                         <td class="border-b border-gray-200 text-center">
                             <button class="edit-btn text-blue-500 hover:text-blue-700 text-sm font-semibold mr-2" data-number="${num}" data-type="3digit">แก้ไข</button> <button class="delete-btn text-red-500 hover:text-red-700 text-sm font-semibold" data-number="${num}" data-type="3digit">ลบ</button> </td>`;
                 } else {
-                     r.innerHTML = `
+                    r.innerHTML = `
                         <td class="border-b border-gray-200">${num}</td>
                         <td class="border-b border-gray-200 text-right">${formatPrice(straightDisplay)}</td>
                         <td class="border-b border-gray-200 text-right text-red-600">${limitStraightDisplay > 0 ? formatPrice(limitStraightDisplay) : '-'}</td>
-                        <td class="border-b border-gray-200 text-right font-semibold">${formatPrice(totalOriginal)}</td>
+                        <td class="border-b border-gray-200 text-right font-semibold">${formatPrice(grandTotalOriginalSum)}</td>
                         <td class="border-b border-gray-200 text-center">
                             <button class="edit-btn text-blue-500 hover:text-blue-700 text-sm font-semibold mr-2" data-number="${num}" data-type="${type}">แก้ไข</button> <button class="delete-btn text-red-500 hover:text-red-700 text-sm font-semibold" data-number="${num}" data-type="${type}">ลบ</button> </td>`;
                 }
@@ -869,8 +973,8 @@
             });
 
             const footerRow = document.createElement('tr');
-             if (type === '3digit') {
-                 footerRow.innerHTML = `
+            if (type === '3digit') {
+                footerRow.innerHTML = `
                     <td class="text-right font-bold">ยอดรวม:</td>
                     <td class="text-right font-bold">${formatPrice(totalStraightDisplaySum)}</td>
                     <td class="text-right font-bold">${formatPrice(totalBoxedDisplaySum)}</td>
@@ -878,18 +982,18 @@
                     <td class="text-right font-bold text-pink-600">${formatPrice(totalLimitBoxedSum)}</td>
                     <td class="text-right font-bold">${formatPrice(grandTotalOriginalSum)}</td>
                     <td></td> `;
-             } else {
-                 footerRow.innerHTML = `
+            } else {
+                footerRow.innerHTML = `
                     <td class="text-right font-bold">ยอดรวม:</td>
                     <td class="text-right font-bold">${formatPrice(totalStraightDisplaySum)}</td>
                     <td class="text-right font-bold text-red-600">${formatPrice(totalLimitStraightSum)}</td>
                     <td class="text-right font-bold">${formatPrice(grandTotalOriginalSum)}</td>
                     <td></td> `;
-             }
-             tableFooter.appendChild(footerRow);
-             saveData(type, data);
-             updateGrandTotalSummary();
-         }
+            }
+            tableFooter.appendChild(footerRow);
+            saveData(type, data);
+            updateGrandTotalSummary();
+        }
 
         function updateGrandTotalSummary() { /* ... (unchanged logic) ... */
             let grandTotal = 0;
@@ -897,8 +1001,8 @@
 
             allDataObjects.forEach(dataObject => {
                 Object.values(dataObject).forEach(item => {
-                    const straightOriginal = Number(item.straight) || 0;
-                    const boxedOriginal = Number(item.boxed) || 0;
+                    const straightOriginal = Number(item?.straight) || 0;
+                    const boxedOriginal = Number(item?.boxed) || 0;
                     grandTotal += (straightOriginal + boxedOriginal);
                 });
             });
@@ -962,56 +1066,87 @@
              saveLimitThresholds();
              updateLimitIndicator(type);
              updateTable(type);
+         }
+
+        function updateCloseNumbersTable() {
+            closeNumbersTableBody.innerHTML = '';
+            closedNumbers.forEach((number, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="border-b border-gray-200">${number}</td>
+                    <td class="border-b border-gray-200 text-center">
+                        <button class="edit-close-number-btn text-blue-500 hover:text-blue-700 text-sm font-semibold mr-2" data-index="${index}">แก้ไข</button>
+                        <button class="delete-close-number-btn text-red-500 hover:text-red-700 text-sm font-semibold" data-index="${index}">ลบ</button>
+                    </td>`;
+                closeNumbersTableBody.appendChild(row);
+            });
         }
 
+        function updateCloseNumbersTable2digit() {
+            closeNumbersTableBody2digit.innerHTML = '';
+            closedNumbers2digit.forEach((number, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="border-b border-gray-200">${number}</td>
+                    <td class="border-b border-gray-200 text-center">
+                        <button class="edit-close-number-btn text-blue-500 hover:text-blue-700 text-sm font-semibold mr-2" data-index="${index}">แก้ไข</button>
+                        <button class="delete-close-number-btn text-red-500 hover:text-red-700 text-sm font-semibold" data-index="${index}">ลบ</button>
+                    </td>`;
+                closeNumbersTableBody2digit.appendChild(row);
+            });
+        }
 
-        // --- Modal Handling (Price Modal) ---
-        let currentModalResolve = null; let currentModalType = null; let currentModalTargetType = null;
+        // --- Modal Handling (Price Modal - For Limits & Reversed) ---
+        let currentModalResolve = null; // Shared resolve function for modals
+        let currentModalType = null;
+        let currentModalTargetType = null;
         function showPriceModal(targetType, type, title, prompt, initialPrice = '', showPerms = false, perms = []) { /* ... (unchanged logic) ... */
              return new Promise((resolve) => {
-                currentModalResolve = resolve;
-                currentModalType = type;
-                currentModalTargetType = targetType;
-                modalTitle.textContent = title;
-                modalPrompt.textContent = prompt;
+                 currentModalResolve = resolve;
+                 currentModalType = type;
+                 currentModalTargetType = targetType;
+                 modalTitle.textContent = title;
+                 modalPrompt.textContent = prompt;
 
-                mainModalPriceContainer.classList.remove('hidden');
-                modalPermutationsContainer.classList.add('hidden');
-                modalPermutationsList.innerHTML = '';
+                 mainModalPriceContainer.classList.remove('hidden');
+                 modalPermutationsContainer.classList.add('hidden');
+                 modalPermutationsList.innerHTML = '';
+                 highlightError(modalPriceInput, false);
 
-                if (type === 'reversed') {
-                    mainModalPriceContainer.classList.add('hidden');
-                    modalPermutationsContainer.classList.remove('hidden');
-                    perms.forEach(pNum => {
-                        const li = document.createElement('li');
-                        li.innerHTML = `
-                            <div class="perm-item"> <input type="checkbox" value="${pNum}" class="perm-checkbox" checked> <span class="perm-number">${pNum}</span> </div>
-                            <input type="number" step="any" class="perm-price-input" value="${initialPrice}" placeholder="0.00"> `;
-                        modalPermutationsList.appendChild(li);
-                    });
-                    checkAllPermsCheckbox.checked = true;
-                } else {
-                    mainModalPriceContainer.querySelector('label[for="modalPriceInput"]').textContent = 'ราคาอั้นสูงสุด:';
-                    let currentThreshold = 0;
-                    if (targetType === '3digit') {
-                        currentThreshold = Number(limitThresholds[`${targetType}_straight`]) || 0;
-                    } else {
+                 if (type === 'reversed') {
+                     mainModalPriceContainer.classList.add('hidden');
+                     modalPermutationsContainer.classList.remove('hidden');
+                     perms.forEach(pNum => {
+                         const li = document.createElement('li');
+                         li.innerHTML = `
+                             <div class="perm-item"> <input type="checkbox" value="${pNum}" class="perm-checkbox" checked> <span class="perm-number">${pNum}</span> </div>
+                             <input type="number" step="any" class="perm-price-input" value="${initialPrice}" placeholder="0.00"> `;
+                         modalPermutationsList.appendChild(li);
+                     });
+                     checkAllPermsCheckbox.checked = true;
+                 } else { // 'global_limit'
+                     mainModalPriceContainer.querySelector('label[for="modalPriceInput"]').textContent = 'ราคาอั้นสูงสุด:';
+                     let currentThreshold = 0;
+                     if (targetType === '3digit') {
                          currentThreshold = Number(limitThresholds[`${targetType}_straight`]) || 0;
-                    }
-                    modalPriceInput.value = currentThreshold > 0 ? currentThreshold : '';
-                }
-
-                priceModal.style.display = 'flex';
-                if (type === 'global_limit') { modalPriceInput.focus(); }
-                else if (type === 'reversed' && modalPermutationsList.querySelector('.perm-price-input')) {
-                     modalPermutationsList.querySelector('.perm-price-input').focus();
+                     } else {
+                         currentThreshold = Number(limitThresholds[`${targetType}_straight`]) || 0;
+                     }
+                     modalPriceInput.value = currentThreshold > 0 ? currentThreshold : '';
                  }
-             });
-         }
-        function hidePriceModal() { /* ... (unchanged) ... */ priceModal.style.display = 'none'; currentModalResolve = null; currentModalType = null; currentModalTargetType = null; }
+
+                 priceModal.style.display = 'flex';
+                 if (type === 'global_limit') { modalPriceInput.focus(); }
+                 else if (type === 'reversed' && modalPermutationsList.querySelector('.perm-price-input')) {
+                      modalPermutationsList.querySelector('.perm-price-input').focus();
+                    }
+                });
+             }
+        function hidePriceModal() { /* ... (unchanged) ... */ priceModal.style.display = 'none'; }
         checkAllPermsCheckbox.addEventListener('change', (e) => { /* ... (unchanged) ... */ const c = e.target.checked; modalPermutationsList.querySelectorAll('.perm-checkbox').forEach(cb => { cb.checked = c; }); });
-        modalOkBtn.addEventListener('click', () => { /* ... (unchanged logic) ... */
-            if (!currentModalResolve) return;
+        modalOkBtn.addEventListener('click', () => { /* ... (unchanged logic for priceModal) ... */
+            if (!currentModalResolve || !['reversed', 'global_limit'].includes(currentModalType)) return;
+
             let result = null; let isValid = true;
 
             if (currentModalType === 'reversed') {
@@ -1026,17 +1161,19 @@
                     }
                 });
                 if (!isValid) { alert('กรุณาป้อนราคาที่ถูกต้องสำหรับทุกรายการที่เลือก'); return; }
-            } else {
+            } else { // global_limit
                 const priceStr = modalPriceInput.value;
                 highlightError(modalPriceInput, false);
                 if (validatePriceInput(priceStr)) { result = Number(priceStr); }
                 else { isValid = false; alert('กรุณาป้อนราคาอั้นสูงสุดเป็นตัวเลขที่ถูกต้อง'); highlightError(modalPriceInput); return; }
             }
             currentModalResolve(result);
+            currentModalResolve = null;
+            currentModalType = null;
             hidePriceModal();
-         });
-        modalCancelBtn.addEventListener('click', () => { /* ... (unchanged) ... */ if (currentModalResolve) { currentModalResolve(null); } hidePriceModal(); });
-        priceModal.addEventListener('click', (e) => { /* ... (unchanged) ... */ if (e.target === priceModal) { if (currentModalResolve) { currentModalResolve(null); } hidePriceModal(); } });
+           });
+        modalCancelBtn.addEventListener('click', () => { /* ... (unchanged) ... */ if (currentModalResolve) { currentModalResolve(null); currentModalResolve = null; currentModalType = null;} hidePriceModal(); });
+        priceModal.addEventListener('click', (e) => { /* ... (unchanged) ... */ if (e.target === priceModal) { if (currentModalResolve) { currentModalResolve(null); currentModalResolve = null; currentModalType = null; } hidePriceModal(); } });
 
         // --- Edit Modal Handling ---
         let currentEditNumber = null; let currentEditType = null;
@@ -1054,11 +1191,13 @@
                  else if (type === 'Run2Top') data = lottoDataRun2Top[number];
                  else if (type === 'Pack4') data = lottoDataPack4[number];
                  else if (type === 'Pack5') data = lottoDataPack5[number];
-                 else data = {};
+                 else data = { straight: 0, boxed: 0 };
 
                  editModalTitle.textContent = `แก้ไขข้อมูลเลข ${number}`;
                  editStraightInput.value = data?.straight || '0';
                  editStraightInput.previousElementSibling.textContent = (type === '3digit' || type === '2digitTop' || type === '2digitBottom') ? 'ราคาตรง (ตั้งต้น):' : 'ราคา (ตั้งต้น):';
+                 highlightError(editStraightInput, false);
+                 highlightError(editBoxedInput, false);
 
                  if (type === '3digit') {
                      editBoxedContainer.style.display = 'block';
@@ -1069,89 +1208,157 @@
                  }
                  editModal.style.display = 'flex';
                  editStraightInput.focus();
+                 editStraightInput.select();
              });
-         }
-        function hideEditModal() { /* ... (unchanged) ... */ editModal.style.display = 'none'; currentModalResolve = null; currentEditNumber = null; currentEditType = null; }
-        editModalOkBtn.addEventListener('click', () => { /* ... (unchanged logic) ... */
+           }
+        function hideEditModal() { /* ... (unchanged) ... */ editModal.style.display = 'none'; }
+        editModalOkBtn.addEventListener('click', () => { /* ... (unchanged logic for editModal) ... */
+            if (!currentModalResolve || !currentEditType) return;
+
              const straightStr = editStraightInput.value;
              const boxedStr = editBoxedInput.value;
-             let isValid = validatePriceInput(straightStr);
+             let isValid = true;
+             highlightError(editStraightInput, false);
+             highlightError(editBoxedInput, false);
+
+             if (!validatePriceInput(straightStr)) {
+                 highlightError(editStraightInput);
+                 isValid = false;
+             }
+
              let updatedData = {
                  straight: Number(straightStr) || 0,
                  boxed: 0,
              };
 
              if (currentEditType === '3digit') {
-                 isValid = isValid && validatePriceInput(boxedStr);
+                 if (!validatePriceInput(boxedStr)) {
+                     highlightError(editBoxedInput);
+                     isValid = false;
+                 }
                  updatedData.boxed = Number(boxedStr) || 0;
              }
 
              if (isValid) {
-                 if (currentModalResolve) { currentModalResolve(updatedData); }
+                 currentModalResolve(updatedData);
+                 currentModalResolve = null;
+                 currentEditType = null;
                  hideEditModal();
              } else { alert('กรุณาป้อนราคาเป็นตัวเลขที่ถูกต้อง'); }
-         });
-        editModalCancelBtn.addEventListener('click', () => { /* ... (unchanged) ... */ if (currentModalResolve) { currentModalResolve(null); } hideEditModal(); });
-        editModal.addEventListener('click', (event) => { /* ... (unchanged) ... */ if (event.target === editModal) { if (currentModalResolve) { currentModalResolve(null); } hideEditModal(); } });
+           });
+        editModalCancelBtn.addEventListener('click', () => { /* ... (unchanged) ... */ if (currentModalResolve) { currentModalResolve(null); currentModalResolve = null; currentEditType = null; } hideEditModal(); });
+        editModal.addEventListener('click', (event) => { /* ... (unchanged) ... */ if (event.target === editModal) { if (currentModalResolve) { currentModalResolve(null); currentModalResolve = null; currentEditType = null; } hideEditModal(); } });
 
-        // --- Boxed Modal Handling ---
-        let currentBoxedModalResolve = null;
-        let currentBoxedNumber = null;
-        let currentBoxedPrice = 0;
+        // --- UPDATED: Boxed Modal Handling (Checkbox + Input version) ---
+        let currentBoxedNumber = null; // Keep track of the number for the boxed modal
 
-        function showBoxedModal(number, price) { /* ... (unchanged) ... */
+        // UPDATED: showBoxedModal - Takes number and initial price, sets inputs and checks boxes
+        function showBoxedModal(number, initialPrice) {
             return new Promise((resolve) => {
-                currentBoxedModalResolve = resolve;
+                currentModalResolve = resolve;
                 currentBoxedNumber = number;
-                currentBoxedPrice = price;
 
-                boxedModalTitle.textContent = `เพิ่มเลขโต๊ด ${number}`;
-                boxedModalPrice.textContent = formatPrice(price);
+                boxedModalTitle.textContent = `เพิ่ม/แก้ไข เลข ${number}`;
+                // Set initial values for both price inputs
+                boxedModalStraightPriceInput.value = initialPrice;
+                boxedModalBoxedPriceInput.value = initialPrice;
+                // Check both boxes by default
                 boxedModalStraightCheck.checked = true;
                 boxedModalBoxedCheck.checked = true;
+                // Clear previous errors
+                highlightError(boxedModalStraightPriceInput, false);
+                highlightError(boxedModalBoxedPriceInput, false);
 
                 boxedModal.style.display = 'flex';
+                boxedModalStraightPriceInput.focus(); // Focus on the first price input
+                boxedModalStraightPriceInput.select();
             });
         }
 
-        function hideBoxedModal() { /* ... (unchanged) ... */
+        // UPDATED: hideBoxedModal - Clears inputs and resets checkboxes
+        function hideBoxedModal() {
             boxedModal.style.display = 'none';
-            currentBoxedModalResolve = null;
+            boxedModalStraightPriceInput.value = '';
+            boxedModalBoxedPriceInput.value = '';
+            boxedModalStraightCheck.checked = true; // Reset check state
+            boxedModalBoxedCheck.checked = true;   // Reset check state
             currentBoxedNumber = null;
-            currentBoxedPrice = 0;
+            // currentModalResolve = null; // Let OK/Cancel handle resolve
         }
 
-        boxedModalOkBtn.addEventListener('click', () => { /* ... (unchanged) ... */
-            if (currentBoxedModalResolve) {
-                const addStraight = boxedModalStraightCheck.checked;
-                const addBoxed = boxedModalBoxedCheck.checked;
+        // UPDATED: boxedModalOkBtn listener - Reads checkboxes and corresponding inputs
+        boxedModalOkBtn.addEventListener('click', () => {
+            if (!currentModalResolve || currentBoxedNumber === null) return;
 
-                if (!addStraight && !addBoxed) {
-                    alert('กรุณาเลือกอย่างน้อยหนึ่งประเภท (ตัวตรง หรือ ตัวโต๊ด)');
-                    return;
+            const addStraight = boxedModalStraightCheck.checked;
+            const addBoxed = boxedModalBoxedCheck.checked;
+            const straightValueStr = boxedModalStraightPriceInput.value;
+            const boxedValueStr = boxedModalBoxedPriceInput.value;
+            let isValid = true;
+            let straightPrice = 0;
+            let boxedPrice = 0;
+
+            highlightError(boxedModalStraightPriceInput, false);
+            highlightError(boxedModalBoxedPriceInput, false);
+
+            // Validate straight price only if checked
+            if (addStraight) {
+                if (!validatePriceInput(straightValueStr)) {
+                    highlightError(boxedModalStraightPriceInput);
+                    isValid = false;
+                } else {
+                    straightPrice = Number(straightValueStr);
                 }
-
-                currentBoxedModalResolve({
-                    number: currentBoxedNumber,
-                    price: currentBoxedPrice,
-                    addStraight: addStraight,
-                    addBoxed: addBoxed
-                });
-                hideBoxedModal();
             }
+
+            // Validate boxed price only if checked
+            if (addBoxed) {
+                if (!validatePriceInput(boxedValueStr)) {
+                    highlightError(boxedModalBoxedPriceInput);
+                    isValid = false;
+                } else {
+                    boxedPrice = Number(boxedValueStr);
+                }
+            }
+
+            // Check if at least one option is selected and valid
+            if (!addStraight && !addBoxed) {
+                 alert('กรุณาเลือกอย่างน้อยหนึ่งรายการ (ตัวตรง หรือ ตัวโต๊ด)');
+                 isValid = false;
+            }
+
+
+            if (!isValid) {
+                alert('กรุณาป้อนราคาให้ถูกต้องสำหรับรายการที่เลือก');
+                return;
+            }
+
+            // Resolve with an object containing flags and prices
+            currentModalResolve({
+                addStraight: addStraight,
+                straightPrice: straightPrice,
+                addBoxed: addBoxed,
+                boxedPrice: boxedPrice
+            });
+            currentModalResolve = null;
+            hideBoxedModal();
         });
 
-        boxedModalCancelBtn.addEventListener('click', () => { /* ... (unchanged) ... */
-            if (currentBoxedModalResolve) {
-                currentBoxedModalResolve(null);
+        // UPDATED: boxedModalCancelBtn listener
+        boxedModalCancelBtn.addEventListener('click', () => {
+            if (currentModalResolve) {
+                currentModalResolve(null);
+                currentModalResolve = null;
             }
             hideBoxedModal();
         });
 
-        boxedModal.addEventListener('click', (event) => { /* ... (unchanged) ... */
+        // UPDATED: boxedModal background click listener
+        boxedModal.addEventListener('click', (event) => {
             if (event.target === boxedModal) {
-                 if (currentBoxedModalResolve) {
-                    currentBoxedModalResolve(null);
+                if (currentModalResolve) {
+                    currentModalResolve(null);
+                    currentModalResolve = null;
                 }
                 hideBoxedModal();
             }
@@ -1259,6 +1466,7 @@
                      else if (typeKey === 'Run2Top') dataObject = lottoDataRun2Top;
                      else if (typeKey === 'Pack4') dataObject = lottoDataPack4;
                      else if (typeKey === 'Pack5') dataObject = lottoDataPack5;
+                     else dataObject = {};
 
                      if (Object.keys(dataObject).length > 0) {
                          const ws = processData(typeKey);
@@ -1294,7 +1502,7 @@
         }
 
         // --- MODIFIED: generateConsolidatedLimitedExcel ---
-        function generateConsolidatedLimitedExcel() {
+        function generateConsolidatedLimitedExcel() { /* ... (unchanged logic) ... */
             const wb = XLSX.utils.book_new();
             let limitedDataForExport = [
                 ["ประเภท", "ตัวเลข", "ยอดเกิน(ตรง/ราคา)", "ยอดเกิน(โต๊ด)", "ยอดรวมเลขเกิน"] // Headers
@@ -1321,8 +1529,8 @@
 
                 Object.keys(data).sort().forEach(num => {
                     const itemData = data[num];
-                    const straightOriginal = Number(itemData.straight) || 0;
-                    const boxedOriginal = Number(itemData.boxed) || 0;
+                    const straightOriginal = Number(itemData?.straight) || 0;
+                    const boxedOriginal = Number(itemData?.boxed) || 0;
                     let limitStraightDisplay = 0;
                     let limitBoxedDisplay = 0;
 
@@ -1373,8 +1581,8 @@
 
                     Object.keys(data).forEach(num => {
                         const itemData = data[num];
-                        const straightOriginal = Number(itemData.straight) || 0;
-                        const boxedOriginal = Number(itemData.boxed) || 0;
+                        const straightOriginal = Number(itemData?.straight) || 0;
+                        const boxedOriginal = Number(itemData?.boxed) || 0;
                         let itemModified = false;
 
                         // Adjust straight price if over limit
@@ -1426,20 +1634,19 @@
 
 
         // --- Event Listeners for Buttons (Generic Handlers) ---
-        // MODIFIED: handleInput for Run2Top
-        function handleInput(event) {
+        function handleInput(event) { /* ... (unchanged) ... */
              const type = event.target.id.includes('3digit') ? '3digit' :
                           event.target.id.includes('2digitTop') ? '2digitTop' :
                           event.target.id.includes('2digitBottom') ? '2digitBottom' :
                           event.target.id.includes('RunTop') ? 'RunTop' :
                           event.target.id.includes('RunBottom') ? 'RunBottom' :
-                          event.target.id.includes('Run2Top') ? 'Run2Top' : // Keep Run2Top here
+                          event.target.id.includes('Run2Top') ? 'Run2Top' :
                           event.target.id.includes('Pack4') ? 'Pack4' : 'Pack5';
 
              let maxLength = 0;
              if (type === '3digit') maxLength = 3;
-             else if (type === '2digitTop' || type === '2digitBottom' || type === 'Run2Top') maxLength = 2; // Run2Top back to 2
-             else if (type === 'RunTop' || type === 'RunBottom') maxLength = 1; // RunTop/Bottom remain 1
+             else if (type === '2digitTop' || type === '2digitBottom' || type === 'Run2Top') maxLength = 2;
+             else if (type === 'RunTop' || type === 'RunBottom') maxLength = 1;
              else if (type === 'Pack4') maxLength = 4;
              else if (type === 'Pack5') maxLength = 5;
 
@@ -1448,7 +1655,7 @@
                  event.target.value = event.target.value.slice(0, maxLength);
              }
              highlightError(event.target, false);
-        }
+         }
 
         function handlePriceInput(event) { /* ... (unchanged) ... */ highlightError(event.target, false); }
         function clearInputs(type) { /* ... (unchanged logic) ... */
@@ -1458,10 +1665,9 @@
              if(priceInp) priceInp.value = '';
              if(numInput) highlightError(numInput, false);
              if(priceInp) highlightError(priceInp, false);
-        }
+         }
 
-        // MODIFIED: validateMandatoryInputs for Run2Top
-        function validateMandatoryInputs(type) {
+        function validateMandatoryInputs(type) { /* ... (unchanged) ... */
              const numInput = document.getElementById(`numberInput${type}`);
              const priceInp = document.getElementById(`priceInput${type}`);
              const numStr = numInput.value;
@@ -1469,8 +1675,8 @@
              let digits = 0;
 
              if (type === '3digit') digits = 3;
-             else if (type === '2digitTop' || type === '2digitBottom' || type === 'Run2Top') digits = 2; // Run2Top expects 2 digits now
-             else if (type === 'RunTop' || type === 'RunBottom') digits = 1; // RunTop/Bottom expect 1 digit
+             else if (type === '2digitTop' || type === '2digitBottom' || type === 'Run2Top') digits = 2;
+             else if (type === 'RunTop' || type === 'RunBottom') digits = 1;
              else if (type === 'Pack4') digits = 4;
              else if (type === 'Pack5') digits = 5;
 
@@ -1478,9 +1684,8 @@
              highlightError(numInput, false);
              highlightError(priceInp, false);
 
-             // Validate number input using the type string (validateNDigitInput handles this)
-             if (!validateNDigitInput(numStr, type)) { // Pass the type string directly
-                 alert(`กรุณาป้อนเลข ${digits} หลักให้ถูกต้อง`); // Use the 'digits' variable for the message
+             if (!validateNDigitInput(numStr, type)) {
+                 alert(`กรุณาป้อนเลข ${digits} หลักให้ถูกต้อง`);
                  highlightError(numInput);
                  isValid = false;
              }
@@ -1492,11 +1697,9 @@
              }
 
              let formattedNumber = numStr;
-             // Pad with leading zero if necessary for 2-digit types (including Run2Top)
              if (digits === 2 && formattedNumber.length === 1) {
                  formattedNumber = '0' + formattedNumber;
              }
-             // Pad with leading zeros if necessary for 3-digit type
              if (digits === 3) {
                  if (formattedNumber.length === 1) formattedNumber = '00' + formattedNumber;
                  else if (formattedNumber.length === 2) formattedNumber = '0' + formattedNumber;
@@ -1504,7 +1707,7 @@
 
 
              return isValid ? { number: formattedNumber, price: Number(priceStr) } : null;
-        }
+         }
 
 
         // --- Limit Button Listeners (Per-Type) ---
@@ -1589,15 +1792,25 @@
         numberInput3digit.addEventListener('input', handleInput);
         priceInput3digit.addEventListener('input', handlePriceInput);
         btnStraight3digit.addEventListener('click', () => {
-             const i = validateMandatoryInputs('3digit');
-             if (i) {
-                 const { number: n, price: p } = i;
-                 if (!lottoData3digit[n]) lottoData3digit[n] = { straight: 0, boxed: 0 };
-                 lottoData3digit[n].straight = (Number(lottoData3digit[n].straight) || 0) + p;
-                 updateTable('3digit'); clearInputs('3digit');
-             }
-         });
+            const number = numberInput3digit.value.trim();
+            if (isNumberClosed(number)) {
+                alert(`เลข ${number} ปิดนะคะ กรุณาป้อนเลขอื่นค่ะ`);
+                return;
+            }
+            const i = validateMandatoryInputs('3digit');
+            if (i) {
+                const { number: n, price: p } = i;
+                if (!lottoData3digit[n]) lottoData3digit[n] = { straight: 0, boxed: 0 };
+                lottoData3digit[n].straight = (Number(lottoData3digit[n].straight) || 0) + p;
+                updateTable('3digit'); clearInputs('3digit');
+            }
+        });
         btnReversed3digit.addEventListener('click', async () => {
+            const number = numberInput3digit.value.trim();
+            if (isNumberClosed(number)) {
+                alert(`เลข ${number} ปิดนะคะ กรุณาป้อนเลขอื่นค่ะ`);
+                return;
+            }
             const i = validateMandatoryInputs('3digit');
             if (i) {
                 const { number: n, price: p } = i; const perms = getPermutations(n);
@@ -1611,26 +1824,33 @@
                 }
             }
         });
-        btnBoxed3digit.addEventListener('click', async () => { /* ... (unchanged from v62) ... */
-             const i = validateMandatoryInputs('3digit');
-             if (i) {
-                 const { number: n, price: p } = i;
-                 const result = await showBoxedModal(n, p);
-                 if (result !== null) {
-                     const { addStraight, addBoxed } = result;
-                     if (!lottoData3digit[n]) lottoData3digit[n] = { straight: 0, boxed: 0 };
-                     if (addStraight) { lottoData3digit[n].straight = (Number(lottoData3digit[n].straight) || 0) + p; }
-                     if (addBoxed) { lottoData3digit[n].boxed = (Number(lottoData3digit[n].boxed) || 0) + p; }
-                     updateTable('3digit'); clearInputs('3digit');
-                 }
-             }
-         });
+        // UPDATED: btnBoxed3digit listener - Uses the Checkbox + Input modal logic
+        btnBoxed3digit.addEventListener('click', () => {
+            const number = numberInput3digit.value.trim();
+            if (isNumberClosed(number)) {
+                alert(`เลข ${number} ปิดนะคะ กรุณาป้อนเลขอื่นค่ะ`);
+                return;
+            }
+            const i = validateMandatoryInputs('3digit');
+            if (i) {
+                const { number: n, price: p } = i;
+                if (!lottoData3digit[n]) lottoData3digit[n] = { straight: 0, boxed: 0 };
+                lottoData3digit[n].boxed = (Number(lottoData3digit[n].boxed) || 0) + p;
+                updateTable('3digit');
+                clearInputs('3digit');
+            }
+        });
         btnExport3digit.addEventListener('click', () => generateExcel('3digit'));
 
-        // 2 Digit Top
+        // 2 Digit Top (listeners unchanged)
         numberInput2digitTop.addEventListener('input', handleInput);
         priceInput2digitTop.addEventListener('input', handlePriceInput);
         btnStraight2digitTop.addEventListener('click', () => {
+            const number = numberInput2digitTop.value.trim();
+            if (isNumberClosed2digit(number)) {
+                alert(`เลข ${number} ปิดนะคะ กรุณาป้อนเลขอื่นค่ะ`);
+                return;
+            }
              const i = validateMandatoryInputs('2digitTop');
              if (i) {
                  const { number: n, price: p } = i;
@@ -1657,10 +1877,15 @@
          });
         btnExport2digitTop.addEventListener('click', () => generateExcel('2digitTop'));
 
-        // 2 Digit Bottom
+        // 2 Digit Bottom (listeners unchanged)
         numberInput2digitBottom.addEventListener('input', handleInput);
         priceInput2digitBottom.addEventListener('input', handlePriceInput);
         btnStraight2digitBottom.addEventListener('click', () => {
+            const number = numberInput2digitBottom.value.trim();
+            if (isNumberClosed2digit(number)) {
+                alert(`เลข ${number} ปิดนะคะ กรุณาป้อนเลขอื่นค่ะ`);
+                return;
+            }
              const i = validateMandatoryInputs('2digitBottom');
              if (i) {
                  const { number: n, price: p } = i;
@@ -1687,7 +1912,7 @@
          });
         btnExport2digitBottom.addEventListener('click', () => generateExcel('2digitBottom'));
 
-        // Run Top
+        // Run Top (listeners unchanged)
         numberInputRunTop.addEventListener('input', handleInput);
         priceInputRunTop.addEventListener('input', handlePriceInput);
         btnAddRunTop.addEventListener('click', () => {
@@ -1702,7 +1927,7 @@
          });
         btnExportRunTop.addEventListener('click', () => generateExcel('RunTop'));
 
-         // Run Bottom
+         // Run Bottom (listeners unchanged)
         numberInputRunBottom.addEventListener('input', handleInput);
         priceInputRunBottom.addEventListener('input', handlePriceInput);
         btnAddRunBottom.addEventListener('click', () => {
@@ -1717,16 +1942,16 @@
          });
         btnExportRunBottom.addEventListener('click', () => generateExcel('RunBottom'));
 
-        // Run 2 Top (Modified back to 2 digits)
+        // Run 2 Top (listeners unchanged)
         numberInputRun2Top.addEventListener('input', handleInput);
         priceInputRun2Top.addEventListener('input', handlePriceInput);
         btnAddRun2Top.addEventListener('click', () => {
-             const i = validateMandatoryInputs('Run2Top'); // Validation now checks for 2 digits
+             const i = validateMandatoryInputs('Run2Top');
              if (i) {
                  const { number: n, price: p } = i;
                  if (!lottoDataRun2Top[n]) lottoDataRun2Top[n] = { straight: 0, boxed: 0 };
                  lottoDataRun2Top[n].straight = (Number(lottoDataRun2Top[n].straight) || 0) + p;
-                 lottoDataRun2Top[n].boxed = 0; // No boxed for Run2Top
+                 lottoDataRun2Top[n].boxed = 0;
                  updateTable('Run2Top');
                  clearInputs('Run2Top');
              }
@@ -1734,7 +1959,7 @@
         btnExportRun2Top.addEventListener('click', () => generateExcel('Run2Top'));
 
 
-         // Pack 4
+         // Pack 4 (listeners unchanged)
         numberInputPack4.addEventListener('input', handleInput);
         priceInputPack4.addEventListener('input', handlePriceInput);
         btnAddPack4.addEventListener('click', () => {
@@ -1749,7 +1974,7 @@
          });
         btnExportPack4.addEventListener('click', () => generateExcel('Pack4'));
 
-        // Pack 5
+        // Pack 5 (listeners unchanged)
         numberInputPack5.addEventListener('input', handleInput);
         priceInputPack5.addEventListener('input', handlePriceInput);
         btnAddPack5.addEventListener('click', () => {
@@ -1764,14 +1989,128 @@
          });
         btnExportPack5.addEventListener('click', () => generateExcel('Pack5'));
 
+        // Close Numbers
+        btnAddCloseNumber.addEventListener('click', () => {
+            const number = closeNumberInput.value.trim();
+            if (!/^\d{3}$/.test(number)) {
+                alert('กรุณาป้อนเลข 3 หลักที่ถูกต้อง');
+                return;
+            }
+
+            const permutations = getPermutations(number);
+            let alreadyClosed = [];
+            permutations.forEach(permutation => {
+                if (isNumberClosed(permutation)) {
+                    alreadyClosed.push(permutation);
+                } else {
+                    closedNumbers.push(permutation);
+                }
+            });
+
+            if (alreadyClosed.length > 0) {
+                alert(`เลขต่อไปนี้ถูกปิดอยู่แล้ว: ${alreadyClosed.join(', ')}`);
+            }
+
+            updateCloseNumbersTable();
+            closeNumberInput.value = '';
+        });
+
+        btnDeleteAllCloseNumbers.addEventListener('click', () => {
+            if (confirm('คุณต้องการลบเลขปิดทั้งหมดใช่หรือไม่?')) {
+                closedNumbers = [];
+                updateCloseNumbersTable();
+                alert('ลบเลขปิดทั้งหมดเรียบร้อยแล้ว');
+            }
+        });
+
+        closeNumbersTableBody.addEventListener('click', (event) => {
+            const target = event.target;
+            const index = target.dataset.index;
+            if (target.classList.contains('edit-close-number-btn')) {
+                const newNumber = prompt('แก้ไขเลขปิด:', closedNumbers[index]);
+                if (newNumber && /^\d{3}$/.test(newNumber)) {
+                    if (isNumberClosed(newNumber)) {
+                        alert(`เลข ${newNumber} ถูกปิดอยู่แล้ว`);
+                    } else {
+                        closedNumbers[index] = newNumber;
+                        updateCloseNumbersTable();
+                    }
+                }
+            } else if (target.classList.contains('delete-close-number-btn')) {
+                if (confirm(`คุณต้องการลบเลข ${closedNumbers[index]} ใช่หรือไม่?`)) {
+                    closedNumbers.splice(index, 1);
+                    updateCloseNumbersTable();
+                }
+            }
+        });
+
+        // Close Numbers 2 Digit
+        btnAddCloseNumber2digit.addEventListener('click', () => {
+            const number = closeNumberInput2digit.value.trim();
+            if (!/^\d{2}$/.test(number)) {
+                alert('กรุณาป้อนเลข 2 หลักที่ถูกต้อง');
+                return;
+            }
+
+            const permutations = getPermutations(number);
+            let alreadyClosed = [];
+            permutations.forEach(permutation => {
+                if (closedNumbers2digit.includes(permutation)) {
+                    alreadyClosed.push(permutation);
+                } else {
+                    closedNumbers2digit.push(permutation);
+                }
+            });
+
+            if (alreadyClosed.length > 0) {
+                alert(`เลขต่อไปนี้ถูกปิดอยู่แล้ว: ${alreadyClosed.join(', ')}`);
+            }
+
+            updateCloseNumbersTable2digit();
+            closeNumberInput2digit.value = '';
+        });
+
+        btnDeleteAllCloseNumbers2digit.addEventListener('click', () => {
+            if (confirm('คุณต้องการลบเลขปิดทั้งหมดใช่หรือไม่?')) {
+                closedNumbers2digit = [];
+                updateCloseNumbersTable2digit();
+                alert('ลบเลขปิดทั้งหมดเรียบร้อยแล้ว');
+            }
+        });
+
+        closeNumbersTableBody2digit.addEventListener('click', (event) => {
+            const target = event.target;
+            const index = target.dataset.index;
+            if (target.classList.contains('edit-close-number-btn')) {
+                const newNumber = prompt('แก้ไขเลขปิด:', closedNumbers2digit[index]);
+                if (newNumber && /^\d{2}$/.test(newNumber)) {
+                    if (closedNumbers2digit.includes(newNumber)) {
+                        alert(`เลข ${newNumber} ถูกปิดอยู่แล้ว`);
+                    } else {
+                        closedNumbers2digit[index] = newNumber;
+                        updateCloseNumbersTable2digit();
+                    }
+                }
+            } else if (target.classList.contains('delete-close-number-btn')) {
+                if (confirm(`คุณต้องการลบเลข ${closedNumbers2digit[index]} ใช่หรือไม่?`)) {
+                    closedNumbers2digit.splice(index, 1);
+                    updateCloseNumbersTable2digit();
+                }
+            }
+        });
 
         // --- Menu Bar Logic ---
         function setActiveMenu(selectedMenuId) { /* ... (unchanged logic) ... */
             const targetPageId = document.getElementById(selectedMenuId)?.dataset?.page;
             if (!targetPageId) return;
 
-            if (selectedMenuId.startsWith('menu')) { currentPageType = selectedMenuId.replace('menu', ''); }
-            else if (selectedMenuId === 'dropdownExportBtn') { currentPageType = 'Export'; }
+            if (selectedMenuId.startsWith('menu')) {
+                currentPageType = selectedMenuId.substring('menu'.length);
+            } else if (selectedMenuId === 'dropdownExportBtn') {
+                currentPageType = 'Export';
+            } else {
+                 currentPageType = null;
+            }
 
             console.log("Setting active menu:", selectedMenuId, "currentPageType:", currentPageType);
 
@@ -1785,17 +2124,17 @@
         dropdownExportBtn.addEventListener('click', () => {
              allPageContents.forEach(content => content.classList.toggle('active', content.id === 'pageExport'));
              menuItems.forEach(item => item.classList.remove('active'));
-             currentPageType = 'Export'; dropdownMenu.classList.add('hidden');
+             currentPageType = 'Export';
+             dropdownMenu.classList.add('hidden');
         });
-        // MODIFIED: dropdownExportLimitedBtn listener calls the updated function
-        dropdownExportLimitedBtn.addEventListener('click', () => { generateConsolidatedLimitedExcel(); /* Logic moved inside function */ });
+        dropdownExportLimitedBtn.addEventListener('click', () => { generateConsolidatedLimitedExcel(); });
 
         // --- Dropdown Menu Item Click (Clear All) ---
-        dropdownClearAllBtn.addEventListener('click', () => { /* ... (unchanged from v61) ... */
+        dropdownClearAllBtn.addEventListener('click', () => { /* ... (unchanged) ... */
             console.log("Clear All button clicked. Proceeding without confirmation.");
             lottoData3digit = {}; lottoData2digitTop = {}; lottoData2digitBottom = {};
             lottoDataRunTop = {}; lottoDataRunBottom = {}; lottoDataRun2Top = {};
-            lottoDataPack4 = {}; lottoDataPack5 = {}; limitThresholds = {};
+            lottoDataPack4 = {}; lottoDataPack5 = {}; limitThresholds = {}; closedNumbers = []; closedNumbers2digit = [];
             console.log("In-memory data cleared.");
             const allTypes = ['3digit', '2digitTop', '2digitBottom', 'RunTop', 'RunBottom', 'Run2Top', 'Pack4', 'Pack5'];
             allTypes.forEach(type => {
@@ -1813,7 +2152,11 @@
             });
             try {
                 updateGrandTotalSummary(); console.log("Grand total summary updated.");
-            } catch(error) { console.error(`Error updating grand total summary:`, error); }
+            } catch(error) {
+                 console.error("Error updating grand total summary:", error);
+            }
+            updateCloseNumbersTable();
+            updateCloseNumbersTable2digit();
             alert('ลบข้อมูลทั้งหมดเรียบร้อยแล้ว');
             dropdownMenu.classList.add('hidden');
         });
@@ -1826,7 +2169,7 @@
 
 
         // --- Edit/Delete Listener (Event Delegation on Tables) ---
-        pageContainer.addEventListener('click', async (event) => { /* ... (unchanged from v61) ... */
+        pageContainer.addEventListener('click', async (event) => { /* ... (unchanged logic) ... */
              const target = event.target;
              const number = target.dataset.number;
              const type = target.dataset.type;
@@ -1844,19 +2187,27 @@
              else { console.error(`Unknown type "${type}"`); return; }
 
              if (target.classList.contains('edit-btn')) {
-                 if (!dataObject[number]) return;
+                 if (!dataObject[number]) {
+                    console.warn(`Edit button clicked for non-existent number: ${type} - ${number}`);
+                    return;
+                 }
                  const updatedData = await showEditModal(type, number);
                  if (updatedData !== null) {
                      dataObject[number].straight = updatedData.straight;
-                     dataObject[number].boxed = updatedData.boxed;
+                     if (type === '3digit') {
+                        dataObject[number].boxed = updatedData.boxed;
+                     }
                      updateTable(type);
                  }
              } else if (target.classList.contains('delete-btn')) {
-                 if (!dataObject[number]) return;
+                 if (!dataObject[number]) {
+                    console.warn(`Delete button clicked for non-existent number: ${type} - ${number}`);
+                    return;
+                 }
                  console.log(`Proceeding to delete ${type} - ${number}`);
                  delete dataObject[number];
                  updateTable(type);
-                 alert(`ลบเลข ${number} (${type}) เรียบร้อยแล้ว`);
+                 // alert(`ลบเลข ${number} (${type}) เรียบร้อยแล้ว`); // Consider removing
              }
          });
 
@@ -1896,27 +2247,41 @@
 
 
         // --- Initial Load ---
-        lottoData3digit = loadData('3digit');
-        lottoData2digitTop = loadData('2digitTop');
-        lottoData2digitBottom = loadData('2digitBottom');
-        lottoDataRunTop = loadData('RunTop');
-        lottoDataRunBottom = loadData('RunBottom');
-        lottoDataRun2Top = loadData('Run2Top');
-        lottoDataPack4 = loadData('Pack4');
-        lottoDataPack5 = loadData('Pack5');
-        limitThresholds = loadLimitThresholds();
+        function initializeApp() {
+            console.log("Initializing App v64.5..."); // Update version log
+            lottoData3digit = loadData('3digit');
+            lottoData2digitTop = loadData('2digitTop');
+            lottoData2digitBottom = loadData('2digitBottom');
+            lottoDataRunTop = loadData('RunTop');
+            lottoDataRunBottom = loadData('RunBottom');
+            lottoDataRun2Top = loadData('Run2Top');
+            lottoDataPack4 = loadData('Pack4');
+            lottoDataPack5 = loadData('Pack5');
+            limitThresholds = loadLimitThresholds();
 
-        const allTypes = ['3digit', '2digitTop', '2digitBottom', 'RunTop', 'RunBottom', 'Run2Top', 'Pack4', 'Pack5'];
-        allTypes.forEach(type => {
-            updateTable(type);
-            updateLimitIndicator(type);
-        });
+            const allTypes = ['3digit', '2digitTop', '2digitBottom', 'RunTop', 'RunBottom', 'Run2Top', 'Pack4', 'Pack5'];
+            allTypes.forEach(type => {
+                try {
+                    updateTable(type);
+                    updateLimitIndicator(type);
+                } catch (error) {
+                    console.error(`Error initializing UI for type ${type}:`, error);
+                }
+            });
 
-        updateGrandTotalSummary();
-        setActiveMenu('menu3digit'); // Set initial active menu
+            try {
+                updateGrandTotalSummary();
+            } catch(error) {
+                 console.error("Error initializing grand total:", error);
+            }
+            updateCloseNumbersTable();
+            updateCloseNumbersTable2digit();
+            setActiveMenu('menu3digit'); // Set initial active menu
+            console.log("App Initialized.");
+        }
+
+        initializeApp(); // Run initialization
 
     </script>
-
 </body>
 </html>
-
