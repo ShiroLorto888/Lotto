@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>โปรแกรมคิดเลขหวย v64.7 (แก้ไข Boxed Modal แบบ Checkbox + Input)</title> <script src="https://cdn.tailwindcss.com"></script>
+    <title>โปรแกรมคิดเลขหวย v2</title> <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1366,7 +1366,7 @@
 
 
         // --- Excel Generation Function ---
-        function generateExcel(type, exportMultiple = false) { /* ... (unchanged logic) ... */
+        function generateExcel(type, exportMultiple = false) {
             const wb = XLSX.utils.book_new();
 
             const processData = (currentType) => {
@@ -1383,8 +1383,8 @@
                 });
 
                 excessColIndices.slice().reverse().forEach(index => {
-                     if (headerCells[index]) headerCells[index].remove();
-                 });
+                    if (headerCells[index]) headerCells[index].remove();
+                });
 
                 tableClone.querySelectorAll('tbody tr').forEach(row => {
                     let netStraight = 0;
@@ -1404,47 +1404,54 @@
 
                     const rowTotal = netStraight + netBoxed;
                     if (row.cells[totalCellIndex - excessColIndices.length]) {
-                         row.cells[totalCellIndex - excessColIndices.length].textContent = formatPrice(rowTotal);
+                        row.cells[totalCellIndex - excessColIndices.length].textContent = formatPrice(rowTotal);
                     }
 
-                     excessColIndices.slice().reverse().forEach(index => {
-                         if (row.cells[index]) row.cells[index].remove();
-                     });
+                    excessColIndices.slice().reverse().forEach(index => {
+                        if (row.cells[index]) row.cells[index].remove();
+                    });
 
                     if (row.cells.length > 0) row.cells[row.cells.length - 1].remove();
-
                 });
 
-                 const footerRow = tableClone.querySelector('tfoot tr');
-                 if (footerRow) {
-                     let footerNetStraightSum = 0;
-                     let footerNetBoxedSum = 0;
-                     let footerTotalCellIndex = -1;
+                const footerRow = tableClone.querySelector('tfoot tr');
+                if (footerRow) {
+                    let footerNetStraightSum = 0;
+                    let footerNetBoxedSum = 0;
+                    let footerTotalCellIndex = -1;
 
-                     const footerNetStraightCell = footerRow.cells[1];
-                     if (footerNetStraightCell) footerNetStraightSum = parseFloat(footerNetStraightCell.textContent.replace(/,/g, '')) || 0;
+                    const footerNetStraightCell = footerRow.cells[1];
+                    if (footerNetStraightCell) footerNetStraightSum = parseFloat(footerNetStraightCell.textContent.replace(/,/g, '')) || 0;
 
+                    if (currentType === '3digit') {
+                        const footerNetBoxedCell = footerRow.cells[2];
+                        if (footerNetBoxedCell) footerNetBoxedSum = parseFloat(footerNetBoxedCell.textContent.replace(/,/g, '')) || 0;
+                        footerTotalCellIndex = 5;
+                    } else {
+                        footerTotalCellIndex = 3;
+                    }
 
-                     if (currentType === '3digit') {
-                         const footerNetBoxedCell = footerRow.cells[2];
-                         if (footerNetBoxedCell) footerNetBoxedSum = parseFloat(footerNetBoxedCell.textContent.replace(/,/g, '')) || 0;
-                         footerTotalCellIndex = 5;
-                     } else {
-                         footerTotalCellIndex = 3;
-                     }
+                    const footerTotal = footerNetStraightSum + footerNetBoxedSum;
+                    if (footerRow.cells[footerTotalCellIndex - excessColIndices.length]) {
+                        footerRow.cells[footerTotalCellIndex - excessColIndices.length].textContent = formatPrice(footerTotal);
+                    }
 
-                     const footerTotal = footerNetStraightSum + footerNetBoxedSum;
-                      if (footerRow.cells[footerTotalCellIndex - excessColIndices.length]) {
-                         footerRow.cells[footerTotalCellIndex - excessColIndices.length].textContent = formatPrice(footerTotal);
-                     }
-
-                     excessColIndices.slice().reverse().forEach(index => {
-                         if (footerRow.cells[index]) footerRow.cells[index].remove();
-                     });
-                     if (footerRow.cells.length > 0) footerRow.cells[footerRow.cells.length - 1].remove();
-                 }
+                    excessColIndices.slice().reverse().forEach(index => {
+                        if (footerRow.cells[index]) footerRow.cells[index].remove();
+                    });
+                    if (footerRow.cells.length > 0) footerRow.cells[footerRow.cells.length - 1].remove();
+                }
 
                 const ws = XLSX.utils.table_to_sheet(tableClone);
+
+                // Ensure numbers with leading zeros are preserved
+                Object.keys(ws).forEach(cell => {
+                    if (cell.startsWith('A') && ws[cell].v) {
+                        ws[cell].t = 's'; // Set cell type to text
+                        ws[cell].v = ws[cell].v.toString().padStart(3, '0'); // Pad numbers to 3 digits
+                    }
+                });
+
                 return ws;
             };
 
@@ -1457,40 +1464,40 @@
             if (exportMultiple) {
                 let sheetsAdded = 0;
                 for (const typeKey in typeToNameMap) {
-                     let dataObject;
-                     if (typeKey === '3digit') dataObject = lottoData3digit;
-                     else if (typeKey === '2digitTop') dataObject = lottoData2digitTop;
-                     else if (typeKey === '2digitBottom') dataObject = lottoData2digitBottom;
-                     else if (typeKey === 'RunTop') dataObject = lottoDataRunTop;
-                     else if (typeKey === 'RunBottom') dataObject = lottoDataRunBottom;
-                     else if (typeKey === 'Run2Top') dataObject = lottoDataRun2Top;
-                     else if (typeKey === 'Pack4') dataObject = lottoDataPack4;
-                     else if (typeKey === 'Pack5') dataObject = lottoDataPack5;
-                     else dataObject = {};
+                    let dataObject;
+                    if (typeKey === '3digit') dataObject = lottoData3digit;
+                    else if (typeKey === '2digitTop') dataObject = lottoData2digitTop;
+                    else if (typeKey === '2digitBottom') dataObject = lottoData2digitBottom;
+                    else if (typeKey === 'RunTop') dataObject = lottoDataRunTop;
+                    else if (typeKey === 'RunBottom') dataObject = lottoDataRunBottom;
+                    else if (typeKey === 'Run2Top') dataObject = lottoDataRun2Top;
+                    else if (typeKey === 'Pack4') dataObject = lottoDataPack4;
+                    else if (typeKey === 'Pack5') dataObject = lottoDataPack5;
+                    else dataObject = {};
 
-                     if (Object.keys(dataObject).length > 0) {
-                         const ws = processData(typeKey);
-                         if (ws) {
-                             XLSX.utils.book_append_sheet(wb, ws, typeToNameMap[typeKey]);
-                             sheetsAdded++;
-                         }
-                     }
+                    if (Object.keys(dataObject).length > 0) {
+                        const ws = processData(typeKey);
+                        if (ws) {
+                            XLSX.utils.book_append_sheet(wb, ws, typeToNameMap[typeKey]);
+                            sheetsAdded++;
+                        }
+                    }
                 }
                 if (sheetsAdded > 0) { XLSX.writeFile(wb, "หวย.xlsx"); }
                 else { alert('ไม่มีข้อมูลในตารางใดๆ ให้ Export'); }
             } else {
-                 let dataObject;
-                 if (type === '3digit') dataObject = lottoData3digit;
-                 else if (type === '2digitTop') dataObject = lottoData2digitTop;
-                 else if (type === '2digitBottom') dataObject = lottoData2digitBottom;
-                 else if (type === 'RunTop') dataObject = lottoDataRunTop;
-                 else if (type === 'RunBottom') dataObject = lottoDataRunBottom;
-                 else if (type === 'Run2Top') dataObject = lottoDataRun2Top;
-                 else if (type === 'Pack4') dataObject = lottoDataPack4;
-                 else if (type === 'Pack5') dataObject = lottoDataPack5;
-                 else { alert('ประเภทข้อมูลสำหรับ Export ไม่ถูกต้อง'); return; }
+                let dataObject;
+                if (type === '3digit') dataObject = lottoData3digit;
+                else if (type === '2digitTop') dataObject = lottoData2digitTop;
+                else if (type === '2digitBottom') dataObject = lottoData2digitBottom;
+                else if (type === 'RunTop') dataObject = lottoDataRunTop;
+                else if (type === 'RunBottom') dataObject = lottoDataRunBottom;
+                else if (type === 'Run2Top') dataObject = lottoDataRun2Top;
+                else if (type === 'Pack4') dataObject = lottoDataPack4;
+                else if (type === 'Pack5') dataObject = lottoDataPack5;
+                else { alert('ประเภทข้อมูลสำหรับ Export ไม่ถูกต้อง'); return; }
 
-                 if (Object.keys(dataObject).length === 0) { alert('ไม่มีข้อมูลในตารางนี้ให้ Export'); return; }
+                if (Object.keys(dataObject).length === 0) { alert('ไม่มีข้อมูลในตารางนี้ให้ Export'); return; }
 
                 const ws = processData(type);
                 if (ws) {
@@ -2299,4 +2306,3 @@
     </script>
 </body>
 </html>
-`
