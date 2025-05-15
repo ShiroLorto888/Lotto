@@ -1447,8 +1447,10 @@
                 // Ensure numbers with leading zeros are preserved
                 Object.keys(ws).forEach(cell => {
                     if (cell.startsWith('A') && ws[cell].v) {
-                        ws[cell].t = 's'; // Set cell type to text
-                        ws[cell].v = ws[cell].v.toString().padStart(3, '0'); // Pad numbers to 3 digits
+                        if (currentType === '2digitTop' || currentType === '2digitBottom') {
+                            ws[cell].t = 's'; // Set cell type to text
+                            ws[cell].v = ws[cell].v.toString().padStart(2, '0'); // Pad numbers to 2 digits
+                        }
                     }
                 });
 
