@@ -155,6 +155,8 @@
                         <button id="btnReversed2digitTop" class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-3 px-5 rounded-md shadow transition duration-150">ตัวกลับ</button>
                         <button id="btnLimit2digitTop" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-5 rounded-md shadow transition duration-150">อั้น</button>
                         <button id="btnExport2digitTop" class="bg-teal-500 hover:bg-teal-600 text-white font-semibold py-3 px-5 rounded-md shadow transition duration-150">Export (หน้านี้)</button>
+                        <!-- เพิ่มปุ่ม Export เกิน -->
+                        <button id="btnExport2digitTopExcess" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-5 rounded-md shadow transition duration-150">Export เกิน</button>
                     </div>
                 </div>
                 <div class="table-section mb-8 overflow-x-auto">
@@ -1904,6 +1906,46 @@ btnReversed2digitTop.addEventListener('click', async () => {
      }
 });
 btnExport2digitTop.addEventListener('click', () => generateExcel('2digitTop'));
+        // เพิ่ม event listener สำหรับปุ่ม Export เกิน 2ตัวบน
+        document.getElementById('btnExport2digitTopExcess').addEventListener('click', () => {
+            // ฟังก์ชัน export เฉพาะรายการที่เกินลิมิตของ 2ตัวบน
+            const wb = XLSX.utils.book_new();
+            const limit = Number(limitThresholds['2digitTop_straight']) || 0;
+            const data = lottoData2digitTop;
+            let rows = [["ตัวเลข", "ราคา(ตั้งต้น)", "ราคาอั้น", "เกิน", "ยอดรวม"]];
+            let hasExcess = false;
+            let totalExcess = 0;
+            Object.keys(data).sort().forEach(num => {
+                const straight = Number(data[num]?.straight) || 0;
+                const boxed = 0;
+                let excess = 0;
+                let capped = straight;
+                if (limit > 0 && straight > limit) {
+                    capped = limit;
+                    excess = straight - limit;
+                }
+                if (excess > 0) {
+                    hasExcess = true;
+                    totalExcess += excess;
+                    rows.push([
+                        num.padStart(2, '0'),
+                        formatPrice(straight),
+                        formatPrice(limit),
+                        formatPrice(excess),
+                        formatPrice(straight)
+                    ]);
+                }
+            });
+            if (!hasExcess) {
+                alert('ไม่มีรายการเกินลิมิตใน 2 ตัวบน');
+                return;
+            }
+            rows.push([]);
+            rows.push(["", "", "รวมเกิน", formatPrice(totalExcess), ""]);
+            const ws = XLSX.utils.aoa_to_sheet(rows);
+            XLSX.utils.book_append_sheet(wb, ws, "2ตัวบนเกิน");
+            XLSX.writeFile(wb, "2ตัวบนเกิน.xlsx");
+        });
 
 // 2 Digit Bottom
 numberInput2digitBottom.addEventListener('input', handleInput);
